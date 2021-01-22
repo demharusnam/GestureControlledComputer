@@ -41,3 +41,9 @@ changeKeyState("SHIFT", False)
 sleep(1)
 m.update(x = 1240, y = 10, pressLeft = True)
 m.update(pressLeft = False)
+
+sleep(1)
+changeKeyState("ALT", True);
+changeKeyState("TAB", True);
+changeKeyState("TAB", False);
+changeKeyState("ALT", False);

@@ -1,4 +1,6 @@
-from ctypes import * #no need to load windows 32 DLL files since ctypes has it as a module
+from ctypes import c_uint16, c_uint32, c_int32, POINTER, Structure, Union, sizeof, windll
+from ctypes import windll
+#no need to load windows 32 DLL files since ctypes has it as a module
 #imports windll, Structure, Union, c_ulong32, POINTER, byref
 
 #NOTE: Always pass structs or unions to functions by pointer
@@ -42,3 +44,5 @@ INPUT_MOUSE = DWORD(0)
 INPUT_KEYBOARD = DWORD(1)
 
 LPINPUT = POINTER(INPUT)
+
+INPUT_BYTES = int(sizeof(INPUT))

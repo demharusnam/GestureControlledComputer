@@ -1,40 +1,24 @@
 from WINDOWS_API_STRUCTS import UINT, LONG, DWORD, ULONG_PTR, INPUT_MOUSE
-from WINDOWS_API_STRUCTS import MOUSEINPUT, DUMMYUNIONNAME, INPUT, LPINPUT
-from ctypes import windll, sizeof
+from WINDOWS_API_STRUCTS import MOUSEINPUT, DUMMYUNIONNAME, INPUT, LPINPUT, INPUT_BYTES
+from WINDOWS_API_STRUCTS import windll
+from WINDOWS_VIRTUAL_KEY_CODES import VK_LBUTTON, VK_RBUTTON
 #from Keyboard import updateKey
 
-#flags for MOUSEINPUT dwFlags parameter
-MOUSEEVENTF_ABSOLUTE = 0x8000 #specify absolute coordinates to move mouse to
-MOUSEEVENTF_MOVE = 0x0001 #mouse has moved
-MOUSEEVENTF_HWHEEL = 0x01000 #mouse wheel moved horizontally (+ for right, - for left)
-MOUSEEVENTF_WHEEL = 0x0800 #mouse wheel moved vertically (+ for up, - for down)
-MOUSEEVENTF_VIRTUALDESK = 0x4000 #move mouse to absolute desktop screen coordinates
-                                # Must be used with MOUSEEVENTF_ABSOLUTE.
-MOUSEEVENTF_LEFTDOWN = 0x0002 #press left mouse button
-MOUSEEVENTF_LEFTUP = 0x0004 #release left mouse button
-MOUSEEVENTF_RIGHTDOWN = 0x0008 #press right mouse button
-MOUSEEVENTF_RIGHTUP = 0x0010 #release right mouse button
+# flags for MOUSEINPUT dwFlags parameter
+MOUSEEVENTF_ABSOLUTE = 0x8000  # specify absolute coordinates to move mouse to
+MOUSEEVENTF_MOVE = 0x0001  # mouse has moved
+MOUSEEVENTF_HWHEEL = 0x01000  # mouse wheel moved horizontally (+ for right, - for left)
+MOUSEEVENTF_WHEEL = 0x0800  # mouse wheel moved vertically (+ for up, - for down)
+MOUSEEVENTF_VIRTUALDESK = 0x4000  # move mouse to absolute desktop screen coordinates
+# Must be used with MOUSEEVENTF_ABSOLUTE.
+MOUSEEVENTF_LEFTDOWN = 0x0002  # press left mouse button
+MOUSEEVENTF_LEFTUP = 0x0004  # release left mouse button
+MOUSEEVENTF_RIGHTDOWN = 0x0008  # press right mouse button
+MOUSEEVENTF_RIGHTUP = 0x0010  # release right mouse button
 
-#virtual keys: https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
-VK_LBUTTON = 0x01
-VK_RBUTTON = 0x02
-
-# https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput
-# parameters of sendInput are:
-# UINT cInputs = number of structs in pInput,
-# LPINPUT pInputs = pointer to array of INPUT structs
-# int cbSize = size (in bytes) of an INPUT struct
-
-"""
-def moveMouseTo(x,y):
-    windll.user32.SendInput(c_uint(1),
-                            byref(INPUT(INPUT_MOUSE, makeMI(x,y, ,))),
-                            sizeof(INPUT))
-"""
-
-#https://stackoverflow.com/questions/4631292/how-detect-current-screen-resolution
-#https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getsystemmetrics?redirectedfrom=MSDN
-#parameters codes for getting a specific system metric
+# https://stackoverflow.com/questions/4631292/how-detect-current-screen-resolution
+# https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getsystemmetrics?redirectedfrom=MSDN
+# parameters codes for getting a specific system metric
 SM_CMONITORS = 80
 SM_CXVIRTUALSCREEN = 78
 SM_CYVIRTUALSCREEN = 79
@@ -66,7 +50,7 @@ class Mouse:
             if((x > -1) or (y > -1)):
                 self.dwFlags = self.dwFlags | MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_VIRTUALDESK | MOUSEEVENTF_MOVE
                 print("mouse will move to pos (%s, %s)" % (x, y))
-                (x,y) = self.normalizePos(x,y)
+                (x,y) = self.__normalizePos(x,y)
 
         elif((x != 0) or (y != 0)): #if the x or y positions of the mouse changed
             self.dwFlags = self.dwFlags | MOUSEEVENTF_MOVE
@@ -117,7 +101,12 @@ class Mouse:
                 self.inputStructPtr.contents.dummyUnion.mouseInput.mouseData = DWORD(dyScroll)
 
             #update mouse
-            windll.user32.SendInput(UINT(1), self.inputStructPtr, int(sizeof(INPUT)))
+            # https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput
+            # parameters of sendInput are:
+            # UINT cInputs = number of structs in pInput,
+            # LPINPUT pInputs = pointer to array of INPUT structs
+            # int cbSize = size (in bytes) of an INPUT struct
+            windll.user32.SendInput(UINT(1), self.inputStructPtr, INPUT_BYTES)
 
             #check for horizontal scrolling, update mouse a second time
             if(dxScroll != 0):
@@ -125,6 +114,6 @@ class Mouse:
                 # repeat the input change with dxScroll replacing dyScroll
                 #changeKeyState("shift", False)
                 self.inputStructPtr.contents.dummyUnion.mouseInput.mouseData = DWORD(dxScroll)
-                windll.user32.SendInput(UINT(1), self.inputStructPtr, sizeof(INPUT))
+                windll.user32.SendInput(UINT(1), self.inputStructPtr, INPUT_BYTES)
                 #changeKeyState("shift", False)
         print()

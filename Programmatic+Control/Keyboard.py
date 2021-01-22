@@ -1,62 +1,80 @@
-import WINDOWS_API_STRUCTS
+from WINDOWS_API_STRUCTS import UINT, LONG, DWORD, ULONG_PTR, INPUT_MOUSE
+from WINDOWS_API_STRUCTS import KEYBDINPUT, DUMMYUNIONNAME, INPUT, LPINPUT
+from WINDOWS_API_STRUCTS import windll, sizeof
 
-KEYEVENTF_KEYUP = 0x0002
+class Keyboard:
 
-#virtual keys: https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
-VK = {}
-VK["BACK"] = 0X08
-VK["TAB"] = 0x09
-VK["CLEAR"] = 0x0C
-VK["RETURN"] = 0x0D
-VK["SHIFT"] = 0x10
-VK["CONTROL"] = 0x11
-VK["MENU"] = 0x12 #alt key?
-VK["PAUSE"] = 0x13
-VK["CAPITAL"] = 0x14 #caps lock key?
-VK["ESCAPE"] = 0x1B
-VK["SPACE"] = 0x20
-VK["PRIOR"] = 0x21
-VK["NEXT"] = 0x22
-VK["END"] = 0x23
-VK["HOME"] = 0x24
-VK["LEFT"] = 0x25
-VK["UP"] = 0x26
-VK["RIGHT"] = 0x27
-VK["DOWN"] = 0x28
-VK["SELECT"] = 0x29
-VK["PRINT"] = 0x2A
-VK["EXECUTE"] =0x2B #don't know what key this is?
-VK["SNAPSHOT"] =0x2C  #printscreen key
-VK["INSERT"] =0x2D
-VK["DELETE"] =0x2E
-VK["HELP"] =0x2F
-#implement the ASCII code for all numbers and all capital letters
-for i in list(range(0x30,0x39))+list(range(0x41,0x5A)):
-    VK[chr(i)] = i
+    #static vars for keycodes, must remain constant
+    KEYEVENTF_KEYUP = 0x0002
 
-weirdVKeyNames = {' ':"SPACE", "ALT":"MENU", "CTRL":"CONTROL", "ENTER":"RETURN"}
+    #virtual keys: https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
+    VK = {}
 
-def changeKeyState(keyName, pressDown):
-    keyName = keyName.upper()
+    VK_MOUSE["LBUTTON"] = 0x01
+    VK_MOUSE["RBUTTON"] = 0x02
+    VK_MOUSE["MBUTTON"] = 0x04
+    VK_MOUSE["XBUTTON1"] = 0x05
+    VK_MOUSE["XBUTTON2"] = 0x06
 
-    if(keyName in weirdVKeyNames):
-        keyName = weirdVKeyNames[keyName]
+    VK["CANCEL"] =0x03
+    VK["BACK"] = 0X08
+    VK["TAB"] = 0x09
+    VK["CLEAR"] = 0x0C
+    VK["RETURN"] = 0x0D
+    VK["SHIFT"] = 0x10
+    VK["CONTROL"] = 0x11
+    VK["MENU"] = 0x12 #alt key?
+    VK["PAUSE"] = 0x13
+    VK["CAPITAL"] = 0x14 #caps lock key?
+    VK["ESCAPE"] = 0x1B
+    VK["SPACE"] = 0x20
+    VK["PRIOR"] = 0x21
+    VK["NEXT"] = 0x22
+    VK["END"] = 0x23
+    VK["HOME"] = 0x24
+    VK["LEFT"] = 0x25
+    VK["UP"] = 0x26
+    VK["RIGHT"] = 0x27
+    VK["DOWN"] = 0x28
+    VK["SELECT"] = 0x29
+    VK["PRINT"] = 0x2A
+    VK["EXECUTE"] =0x2B #don't know what key this is?
+    VK["SNAPSHOT"] =0x2C  #printscreen key
+    VK["INSERT"] =0x2D
+    VK["DELETE"] =0x2E
+    VK["HELP"] =0x2F
+    #implement the ASCII code for all numbers and all capital letters https://docs.microsoft.com/en-us/windows/win32/learnwin32/keyboard-input
+    VK_NUM = [0x00] * 9
+    for i in list(range(0x31,0x3A)):
+        VK_NUM[chr(i)] = i;
 
-    dwFlags = 0
-    if(pressDown == 0):
-        dwFlags = KEYEVENTF_KEYUP
-        print("releasing '%s' key (code = 0x%x)" % (keyName, VK[keyName]))
-    else:
-        print("pressing '%s' key (code = 0x%x)" % (keyName, VK[keyName]))
+    VK_ALPHA = [0x00] * 26
+    for i in list(range(0x41,0x5B)):
+        VK_ALPHA[chr(i)] = i
 
-    ki = KEYBDINPUT(WORD(VK[keyName]), #virtual key
-                    WORD(0), #no scan code (unicode?) specified, virtual key used instead
-                    DWORD(dwFlags),
-                    DWORD(0),  # set time to 0 so system assigns its own time
-                    ULONG_PTR(LONG(windll.user32.GetMessageExtraInfo())))  # get data for dwExtraInfo from calling GetMessageExtraInfo())
+    weirdVKeyNames = {' ':"SPACE", "ALT":"MENU", "CTRL":"CONTROL", "ENTER":"RETURN"}
 
-    du = DUMMYUNIONNAME()
-    du.ki = ki
-    windll.user32.SendInput(UINT(1),
-                            LPINPUT(INPUT(INPUT_KEYBOARD, du)),
-                            int(sizeof(INPUT)))
+    def changeKeyState(keyName, pressDown):
+        keyName = keyName.upper()
+
+        if(keyName in weirdVKeyNames):
+            keyName = weirdVKeyNames[keyName]
+
+        dwFlags = 0
+        if(pressDown == 0):
+            dwFlags = KEYEVENTF_KEYUP
+            print("releasing '%s' key (code = 0x%x)" % (keyName, VK[keyName]))
+        else:
+            print("pressing '%s' key (code = 0x%x)" % (keyName, VK[keyName]))
+
+        ki = KEYBDINPUT(WORD(VK[keyName]), #virtual key
+                        WORD(0), #no scan code (unicode?) specified, virtual key used instead
+                        DWORD(dwFlags),
+                        DWORD(0),  # set time to 0 so system assigns its own time
+                        ULONG_PTR(LONG(windll.user32.GetMessageExtraInfo())))  # get data for dwExtraInfo from calling GetMessageExtraInfo())
+
+        du = DUMMYUNIONNAME()
+        du.ki = ki
+        windll.user32.SendInput(UINT(1),
+                                LPINPUT(INPUT(INPUT_KEYBOARD, du)),
+                                int(sizeof(INPUT)))
