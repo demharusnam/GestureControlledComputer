@@ -1,9 +1,10 @@
-from Mouse import updateMouse
+from Mouse import Mouse
 from MouseKeyboardInput import changeKeyState
 from time import sleep
 
-updateMouse() #test if no updates to mouse do nothing (as intended)
-updateMouse(x = 500, y = 500)
+m = Mouse()
+m.update() #test if no updates to mouse do nothing (as intended)
+m.update(x = 500, y = 500)
 
 changeKeyState("ALT", True);
 changeKeyState("TAB", True);
@@ -24,19 +25,19 @@ changeKeyState("ENTER", False);
 #scroll mouse cursor in a square path
 sleep(2)
 #moving scrollbar down or left uses negative scroll numbers
-updateMouse(dyScroll = -500)
+m.update(dyScroll = -500)
 sleep(1)
 changeKeyState("SHIFT", True)
-updateMouse(dxScroll = -500)
+m.update(dxScroll = -500)
 changeKeyState("SHIFT", False)
 sleep(1)
 #moving scrollbar up or right uses positive scroll numbers
-updateMouse(dyScroll = 500)
+m.update(dyScroll = 500)
 sleep(1)
 changeKeyState("SHIFT", True)
-updateMouse(dxScroll = 500);
+m.update(dxScroll = 500);
 changeKeyState("SHIFT", False)
 
 sleep(1)
-updateMouse(x = 1240, y = 10, pressLeft = True)
-updateMouse(pressLeft = False)
+m.update(x = 1240, y = 10, pressLeft = True)
+m.update(pressLeft = False)
