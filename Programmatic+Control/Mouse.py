@@ -96,6 +96,11 @@ class Mouse:
             self.inputStructPtr.contents.dummyUnion.mouseInput.mouseData = DWORD(0) #specifies mouse scroll wheel value relative to WHEEL_TICKS = 120?
             self.inputStructPtr.contents.dummyUnion.mouseInput.dwFlags = DWORD(self.dwFlags)
 
+            """resources on converting from WN_WHEELTICKS to pixels
+                https://stackoverflow.com/questions/7763326/how-many-pixels-are-scrolled-on-a-website-with-a-mouse-wheel-down-event
+                https: // docs.microsoft.com / en - us / previous - versions / ms997498(v=msdn.10)?redirectedfrom = MSDN
+            """
+
             #check for vertical scrolling
             if(dyScroll != 0):
                 print("scrolling vertically by %s" % (dyScroll))
