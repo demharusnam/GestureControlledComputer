@@ -27,6 +27,9 @@ class Mouse:
     def __init__(self):
         # use a single INPUT struct so its memory can be reused when the mouse is updated multiple times
         self.inputStructPtr = LPINPUT(INPUT(INPUT_MOUSE, DUMMYUNIONNAME(MOUSEINPUT())))
+        self.inputStructPtr.contents.dummyUnion.mouseInput.time = DWORD(0)  # set time to 0 so system assigns its own time
+        self.inputStructPtr.contents.dummyUnion.mouseInput.dwExtraInfo = ULONG_PTR(LONG(windll.user32.GetMessageExtraInfo()))  # get data for dwExtraInfo from calling GetMessageExtraInfo()
+
 
         print("number of monitors is ",windll.user32.GetSystemMetrics(SM_CMONITORS))
         self.screenWidth = windll.user32.GetSystemMetrics(SM_CXVIRTUALSCREEN)
@@ -90,10 +93,8 @@ class Mouse:
 
             self.inputStructPtr.contents.dummyUnion.mouseInput.dx = LONG(x)
             self.inputStructPtr.contents.dummyUnion.mouseInput.dy = LONG(y)
-            self.inputStructPtr.contents.dummyUnion.mouseInput.mouseData = DWORD(0)
+            self.inputStructPtr.contents.dummyUnion.mouseInput.mouseData = DWORD(0) #specifies mouse scroll wheel value relative to WHEEL_TICKS = 120?
             self.inputStructPtr.contents.dummyUnion.mouseInput.dwFlags = DWORD(self.dwFlags)
-            self.inputStructPtr.contents.dummyUnion.mouseInput.time = DWORD(0)  # set time to 0 so system assigns its own time
-            self.inputStructPtr.contents.dummyUnion.mouseInput.dwExtraInfo = ULONG_PTR(LONG(windll.user32.GetMessageExtraInfo()))  # get data for dwExtraInfo from calling GetMessageExtraInfo()
 
             #check for vertical scrolling
             if(dyScroll != 0):
