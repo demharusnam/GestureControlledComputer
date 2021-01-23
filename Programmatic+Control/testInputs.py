@@ -47,3 +47,4 @@ changeKeyState("ALT", True);
 changeKeyState("TAB", True);
 changeKeyState("TAB", False);
 changeKeyState("ALT", False);
+m.update(x = 600,y = 350)
