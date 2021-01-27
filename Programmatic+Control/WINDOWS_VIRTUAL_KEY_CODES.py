@@ -1,4 +1,6 @@
-#virtual keys: https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
+# These virtual key code variable names are intended to comply with Microsoft's
+# naming scheme for them
+# virtual keys: https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
 
 #mouse specific buttons
 VK_LBUTTON = 0x01
@@ -49,7 +51,9 @@ VK_APPS = 0x5D          #Applications key (Natural keyboard)
 #0x5E is reserved
 VK_SLEEP = 0x5F         #Computer Sleep key
 
-#NUMPAD keys
+
+""" NUMPAD keys
+    Note: VK_NUMPADN = 0x60 + N
 VK_NUMPAD0 = 0x60       #Numeric keypad 0 key
 VK_NUMPAD1 = 0x61       #Numeric keypad 1 key
 VK_NUMPAD2 = 0x62       #Numeric keypad 2 key
@@ -59,7 +63,7 @@ VK_NUMPAD5 = 0x65       #Numeric keypad 5 key
 VK_NUMPAD6 = 0x66       #Numeric keypad 6 key
 VK_NUMPAD7 = 0x67       #Numeric keypad 7 key
 VK_NUMPAD8 = 0x68       #Numeric keypad 8 key
-VK_NUMPAD9 = 0x69       #Numeric keypad 9 key
+VK_NUMPAD9 = 0x69       #Numeric keypad 9 key"""
 VK_MULTIPLY = 0x6A      #Multiply (*) key (not the same key as SHIFT+8)
 VK_ADD = 0x6B           #Add (+) key (not the same key as the '+' key next to BACKSPACE)
 VK_SEPARATOR = 0x6C     #Separator key (unknown to me?)

@@ -26,7 +26,7 @@ SM_CYVIRTUALSCREEN = 79
 class Mouse:
     def __init__(self):
         # use a single INPUT struct so its memory can be reused when the mouse is updated multiple times
-        self.inputStructPtr = LPINPUT(INPUT(INPUT_MOUSE, DUMMYUNIONNAME(MOUSEINPUT())))
+        self.inputStructPtr = LPINPUT(INPUT(INPUT_MOUSE, DUMMYUNIONNAME(mi = MOUSEINPUT())))
         self.inputStructPtr.contents.dummyUnion.mouseInput.time = DWORD(0)  # set time to 0 so system assigns its own time
         self.inputStructPtr.contents.dummyUnion.mouseInput.dwExtraInfo = ULONG_PTR(LONG(windll.user32.GetMessageExtraInfo()))  # get data for dwExtraInfo from calling GetMessageExtraInfo()
 
