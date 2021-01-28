@@ -67,6 +67,11 @@ class Keyboard:
         keyParts = [x for x in keyString.split(' ') if(x != '')] #get rid of any blank '' entries
         keyName = keyParts[-1] #main key name
 
+        #extract the main key name from the last part of keyname from string
+        #any modifier words (up, down, left, right) should be separated from the main key name by a spae
+        keyParts = [x for x in keyString.split(' ') if(x != '')] #get rid of any blank '' entries
+        keyName = keyParts[-1] #main key name
+
         chars = len(keyName)
         if (chars == 1): #check through all 1 letter key names
             # implement the ASCII code for all numbers and all capital letters https://docs.microsoft.com/en-us/windows/win32/learnwin32/keyboard-input
