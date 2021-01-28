@@ -31,8 +31,8 @@ class Mouse:
 
 
         print("number of monitors is ",windll.user32.GetSystemMetrics(SM_CMONITORS))
-        self.screenWidth = windll.user32.GetSystemMetrics(SM_CXVIRTUALSCREEN)
-        self.screenHeight = windll.user32.GetSystemMetrics(SM_CYVIRTUALSCREEN)
+        self.getScreenWidth() #initialize screenWidth variable
+        self.getScreenHeight() #initialize screenHeight variable
         print("screen is ", self.screenWidth," px wide by ", self.screenHeight," px tall")
 
     def getScreenWidth(self):
