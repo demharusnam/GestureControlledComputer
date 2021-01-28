@@ -1,8 +1,17 @@
 from Mouse import Mouse
+from Keyboard import Keyboard
 from MouseKeyboardInput import changeKeyState
-from time import sleep
+import time
 
-m = Mouse()
+kb = Keyboard()
+kb.moveKey("LEFT WINDOWS", pressDown = True)
+kb.moveKey("LEFT WINDOWS", pressDown = False)
+time.sleep(1)
+kb.moveKey("B",True)
+kb.moveKey("B",False)
+kb.typeText("googlehfjsdfbjewnfiewdnas,dj,asn,nfleeiwfniejfilehnflsekf;k;l[;/./,,''")
+
+"""m = Mouse()
 m.update() #test if no updates to mouse do nothing (as intended)
 m.update(x = 500, y = 500)
 
@@ -47,4 +56,4 @@ changeKeyState("ALT", True);
 changeKeyState("TAB", True);
 changeKeyState("TAB", False);
 changeKeyState("ALT", False);
-m.update(x = 600,y = 350)
+m.update(x = 600,y = 350)"""
