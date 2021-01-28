@@ -1,14 +1,14 @@
 from WINDOWS_API_STRUCTS import UINT, LONG, WORD, DWORD, ULONG_PTR, INPUT_KEYBOARD
 from WINDOWS_API_STRUCTS import KEYBDINPUT, DUMMYUNIONNAME, INPUT, LPINPUT, INPUT_BYTES
 from WINDOWS_API_STRUCTS import windll
-#from WINDOWS_VIRTUAL_KEY_CODES import VK, VK_NUMS, VK_ALPHABET, VK_LWIN, VK_CONTROL
+# from WINDOWS_VIRTUAL_KEY_CODES import VK, VK_NUMS, VK_ALPHABET, VK_LWIN, VK_CONTROL
 from WINDOWS_VIRTUAL_KEY_CODES import *
 import time
 
 # static vars for keycodes, must remain constant
 # If specified, key is being released. If not specified, key is being pressed. https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-keybdinput
-KEYEVENTF_KEYUP = 0x0002 #for releasing a key
-KEYEVENTF_UNICODE = 0x0004 #specifies unicode char in wScan and wVk will be ignored
+KEYEVENTF_KEYUP = 0x0002  # for releasing a key
+KEYEVENTF_UNICODE = 0x0004  # specifies unicode char in wScan and wVk will be ignored
 
 # use a single INPUT struct so its memory can be reused when the mouse is updated multiple times
 inputStructPtr = LPINPUT(INPUT(INPUT_KEYBOARD, DUMMYUNIONNAME(ki = KEYBDINPUT())))
@@ -60,7 +60,7 @@ class Keyboard:
     """
 
     def __getVKCode(self,keyString):
-        VK_code = 0x00;  # this keycode it a placeholder, it is not used in Windows for any known virtual keys
+        VK_code = 0x00  # this keycode it a placeholder, it is not used in Windows for any known virtual keys
 
         #extract the main key name from the last part of keyname from string
         #any modifier words (up, down, left, right) should be separated from the main key name by a spae
@@ -79,7 +79,7 @@ class Keyboard:
             elif(keyName == '+'):
                 VK_code = VK_OEM_PLUS
             elif(keyName == ','):
-                VK_code == VK_OEM_COMMA
+                VK_code = VK_OEM_COMMA
             elif(keyName == '-'):
                 VK_code = VK_OEM_MINUS
             elif(keyName == '.'):
@@ -138,7 +138,7 @@ class Keyboard:
                     elif(keyName == "RIGHT"):
                         VK_code = VK_RCONTROL #RIGHT CTRL
             elif (keyName == "DOWN" and keyParts[0] == "PAGE"):
-                VK_code == VK_NEXT #PAGE DOWN
+                VK_code = VK_NEXT #PAGE DOWN
             elif(keyName == "HELP"):
                 VK_code = VK_HELP #HELP
             elif (keyName == "HOME"):
@@ -216,10 +216,20 @@ class Keyboard:
             if(keyName == "PRINTSCREEN"):
                 VK_code = VK_SNAPSHOT #PRINTSCREEN
 
-        return VK_code;
+        return VK_code
+
+    def isKeyPressed(self, keyString):
+        VK_code = self.__getVKCode(keyString)
+        if(VK_code == 0x00):
+            print("keyString '%s' is unrecognized" % (keyString))
+        else:
+            #complies with https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getkeystate
+            #test if high order bit (left most bit) is a 1
+            #if so, key is down aka pressed down
+            return bool(windll.user32.GetKeyState(VK_code) & 0x8000)
 
     def updateKey(self,keyString, pressDown):
-        #get list of VK codes from names of keys
+        #get VK code from names of keys
         VK_code = self.__getVKCode(keyString)
 
         if(VK_code == 0x00):

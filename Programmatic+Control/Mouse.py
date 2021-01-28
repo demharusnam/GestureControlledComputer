@@ -83,13 +83,13 @@ class Mouse:
                 print("left button already released")
 
         if (pressRight):
-            if ((windll.user32.GetKeyState(VK_RBUTTON) & 0x100) == 0):
+            if ((windll.user32.GetKeyState(VK_RBUTTON) & 0x8000) == 0):
                 self.dwFlags = self.dwFlags | MOUSEEVENTF_RIGHTDOWN
                 print("pressing right button")
             else:
                 print("right button already pressed")
         else:
-            if ((windll.user32.GetKeyState(VK_RBUTTON) & 0x100) != 0):
+            if ((windll.user32.GetKeyState(VK_RBUTTON) & 0x8000) != 0):
                 self.dwFlags = self.dwFlags | MOUSEEVENTF_RIGHTUP
                 print("releasing right button")
             else:
