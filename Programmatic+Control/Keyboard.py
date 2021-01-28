@@ -218,7 +218,7 @@ class Keyboard:
 
         return VK_code;
 
-    def moveKey(self,keyString, pressDown):
+    def updateKey(self,keyString, pressDown):
         #get list of VK codes from names of keys
         VK_code = self.__getVKCode(keyString)
 
@@ -253,4 +253,4 @@ class Keyboard:
             print("typing char '%c' = %x" %(char, ord(char)))
             inputStructPtr.contents.dummyUnion.keyboardInput.wScan = WORD(ord(char))# unicode char to be typed
             windll.user32.SendInput(UINT(1), inputStructPtr, INPUT_BYTES) #ask OS to type unicode char for you
-            time.sleep(0.001)
+            time.sleep(0.02)

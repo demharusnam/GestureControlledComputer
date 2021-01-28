@@ -2,7 +2,6 @@ from WINDOWS_API_STRUCTS import UINT, LONG, DWORD, ULONG_PTR, INPUT_MOUSE
 from WINDOWS_API_STRUCTS import MOUSEINPUT, DUMMYUNIONNAME, INPUT, LPINPUT, INPUT_BYTES
 from WINDOWS_API_STRUCTS import windll
 from WINDOWS_VIRTUAL_KEY_CODES import VK_LBUTTON, VK_RBUTTON
-#from Keyboard import updateKey
 
 # flags for MOUSEINPUT dwFlags parameter
 MOUSEEVENTF_ABSOLUTE = 0x8000  # specify absolute coordinates to move mouse to
@@ -36,6 +35,14 @@ class Mouse:
         self.screenHeight = windll.user32.GetSystemMetrics(SM_CYVIRTUALSCREEN)
         print("screen is ", self.screenWidth," px wide by ", self.screenHeight," px tall")
 
+    def getScreenWidth(self):
+        self.screenWidth = windll.user32.GetSystemMetrics(SM_CXVIRTUALSCREEN)
+        return self.screenWidth
+
+    def getScreenHeight(self):
+        self.screenHeight = windll.user32.GetSystemMetrics(SM_CYVIRTUALSCREEN)
+        return self.screenHeight
+
     # must normalize x and y if using absolute coordinates
     # https://stackoverflow.com/questions/49026921/sendinput-always-moves-mouse-pointer-to-left-top-corner
     def __normalizePos(self, dxPos, dyPos):
@@ -46,7 +53,7 @@ class Mouse:
     #Movement of mouse pointer position works best when using absolute coordinates for screen pixels
     #Relative coordinates for mouse pointer position uses a different scaling factor which I haven't accounted for
     #Scrolling units seems to be relative to "wheel ticks", not screen pixels
-    def update(self, x = -1, y = -1, absPos = True, dxScroll = 0, dyScroll = 0, pressLeft = False, pressRight = False):
+    def update(self, x = -1, y = -1, absPos = True, dxScroll = 0, keyboard = None, dyScroll = 0, pressLeft = False, pressRight = False):
         self.dwFlags = 0
 
         if (absPos):
@@ -118,8 +125,8 @@ class Mouse:
             if(dxScroll != 0):
                 print("scrolling horizontally by %s" % (dyScroll))
                 # repeat the input change with dxScroll replacing dyScroll
-                #changeKeyState("shift", False)
+                keyboard.updateKey("SHIFT", True)
                 self.inputStructPtr.contents.dummyUnion.mouseInput.mouseData = DWORD(dxScroll)
                 windll.user32.SendInput(UINT(1), self.inputStructPtr, INPUT_BYTES)
-                #changeKeyState("shift", False)
+                keyboard.updateKey("SHIFT", False)
         print()

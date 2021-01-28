@@ -3,13 +3,54 @@ from Keyboard import Keyboard
 from MouseKeyboardInput import changeKeyState
 import time
 
+m = Mouse()
 kb = Keyboard()
-kb.moveKey("LEFT WINDOWS", pressDown = True)
-kb.moveKey("LEFT WINDOWS", pressDown = False)
+#open google chrome
+kb.updateKey("LEFT WINDOWS", pressDown = True)
+kb.updateKey("LEFT WINDOWS", pressDown = False)
 time.sleep(1)
-kb.moveKey("B",True)
-kb.moveKey("B",False)
-kb.typeText("googlehfjsdfbjewnfiewdnas,dj,asn,nfleeiwfniejfilehnflsekf;k;l[;/./,,''")
+kb.typeText("google")
+time.sleep(0.1)
+kb.updateKey("ENTER", True)
+kb.updateKey("ENTER", False)
+time.sleep(1)
+#search for "apples" in the search bar
+kb.typeText("apples")
+kb.updateKey("ENTER", True)
+kb.updateKey("ENTER", False)
+time.sleep(2)
+#zoom in twice
+kb.updateKey("LEFT CTRL", True)
+kb.updateKey("+", True)
+kb.updateKey("+", False)
+kb.updateKey("+", True)
+kb.updateKey("+", False)
+kb.updateKey("LEFT CTRL", False)
+time.sleep(1.5)
+#scroll in a square
+    #moving scrollbar down or left uses negative scroll numbers
+m.update(x = 500, y = 500, dyScroll = -500)
+time.sleep(1)
+m.update(dxScroll = -500, keyboard = kb)
+time.sleep(1)
+    #moving scrollbar up or right uses positive scroll numbers
+m.update(dyScroll = 500)
+time.sleep(1)
+m.update(dxScroll = 500, keyboard = kb)
+time.sleep(1)
+#zoom out twice
+kb.updateKey("LEFT CTRL", True)
+kb.updateKey("-", True)
+kb.updateKey("-", False)
+kb.updateKey("-", True)
+kb.updateKey("-", False)
+kb.updateKey("LEFT CTRL", False)
+time.sleep(1)
+#close google chrome window
+m.update(x = m.getScreenWidth()-10, y = 10, pressLeft = True)
+m.update(pressLeft = False)
+#move mouse to center of screen (away from any X buttons that close windows)
+m.update(x = 600,y = 350)
 
 """m = Mouse()
 m.update() #test if no updates to mouse do nothing (as intended)
