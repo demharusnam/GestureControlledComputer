@@ -268,4 +268,4 @@ class Keyboard:
             print("typing char '%c' = %x" %(char, ord(char)))
             inputStructPtr.contents.dummyUnion.keyboardInput.wScan = WORD(ord(char))# unicode char to be typed
             windll.user32.SendInput(UINT(1), inputStructPtr, INPUT_BYTES) #ask OS to type unicode char for you
-            time.sleep(0.02)
+            time.sleep(0.05)
