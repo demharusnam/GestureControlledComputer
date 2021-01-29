@@ -10,15 +10,16 @@ kb.updateKey("LEFT WINDOWS", pressDown = True)
 kb.updateKey("LEFT WINDOWS", pressDown = False)
 time.sleep(1) #wait for Windows menu to appear
 kb.typeText("google")
-time.sleep(0.1) #apparently hitting enter without waiting does not register right?
+time.sleep(0.5) #apparently hitting enter without waiting does not register right?
 kb.updateKey("ENTER", True)
 kb.updateKey("ENTER", False)
 time.sleep(1)
 #search for "apples" in the search bar
 kb.typeText("apple")
+time.sleep(0.5)
 kb.updateKey("ENTER", True)
 kb.updateKey("ENTER", False)
-time.sleep(2)
+time.sleep(5)
 #zoom in twice
 kb.updateKey("LEFT CTRL", True)
 kb.updateKey("+", True)
@@ -79,7 +80,7 @@ kb.updateKey("V",False)
 kb.updateKey("CTRL", False)
 kb.updateKey("ENTER", True)
 kb.updateKey("ENTER", False)
-time.sleep(2)
+time.sleep(5)
 m.update(x = 370, y = 285, pressLeft = True)
 m.update(pressLeft = False)
 time.sleep(2)
@@ -90,7 +91,7 @@ time.sleep(1)
 #press "View page source" button
 m.update(x = 390, y = 521, pressLeft = True)
 m.update(pressLeft = False)
-time.sleep(2)
+time.sleep(5)
 #close google chrome window
 m.update(x = m.getScreenWidth()-10, y = 10, pressLeft = True)
 m.update(pressLeft = False)
