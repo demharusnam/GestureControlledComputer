@@ -1,6 +1,6 @@
-import ctypes
 from WINDOWS_API_STRUCTS import UINT, LONG, DWORD, ULONG_PTR, INPUT_MOUSE
-from WINDOWS_API_STRUCTS import MOUSEINPUT, DUMMYUNIONNAME, INPUT, LPINPUT, INPUT_STRUCT_BYTES
+from WINDOWS_API_STRUCTS import MOUSEINPUT, DUMMYUNIONNAME, INPUT, LPINPUT, INPUT_BYTES
+from WINDOWS_API_STRUCTS import windll
 from WINDOWS_VIRTUAL_KEY_CODES import VK_LBUTTON, VK_RBUTTON
 
 # flags for MOUSEINPUT dwFlags parameter
@@ -27,20 +27,20 @@ class Mouse:
         # use a single INPUT struct so its memory can be reused when the mouse is updated multiple times
         self.inputStructPtr = LPINPUT(INPUT(INPUT_MOUSE, DUMMYUNIONNAME(mi = MOUSEINPUT())))
         self.inputStructPtr.contents.dummyUnion.mouseInput.time = DWORD(0)  # set time to 0 so system assigns its own time
-        self.inputStructPtr.contents.dummyUnion.mouseInput.dwExtraInfo = ULONG_PTR(LONG(ctypes.windll.user32.GetMessageExtraInfo()))  # get data for dwExtraInfo from calling GetMessageExtraInfo()
+        self.inputStructPtr.contents.dummyUnion.mouseInput.dwExtraInfo = ULONG_PTR(LONG(windll.user32.GetMessageExtraInfo()))  # get data for dwExtraInfo from calling GetMessageExtraInfo()
 
 
-        print("number of monitors is ", ctypes.windll.user32.GetSystemMetrics(SM_CMONITORS))
+        print("number of monitors is ",windll.user32.GetSystemMetrics(SM_CMONITORS))
         self.getScreenWidth() #initialize screenWidth variable
         self.getScreenHeight() #initialize screenHeight variable
         print("screen is ", self.screenWidth," px wide by ", self.screenHeight," px tall")
 
     def getScreenWidth(self):
-        self.screenWidth = ctypes.windll.user32.GetSystemMetrics(SM_CXVIRTUALSCREEN)
+        self.screenWidth = windll.user32.GetSystemMetrics(SM_CXVIRTUALSCREEN)
         return self.screenWidth
 
     def getScreenHeight(self):
-        self.screenHeight = ctypes.windll.user32.GetSystemMetrics(SM_CYVIRTUALSCREEN)
+        self.screenHeight = windll.user32.GetSystemMetrics(SM_CYVIRTUALSCREEN)
         return self.screenHeight
 
     # must normalize x and y if using absolute coordinates
@@ -70,26 +70,26 @@ class Mouse:
             self.dwFlags = self.dwFlags | MOUSEEVENTF_WHEEL
 
         if(pressLeft):
-            if ((ctypes.windll.user32.GetKeyState(VK_LBUTTON) & 0x8000) == 0):
+            if ((windll.user32.GetKeyState(VK_LBUTTON) & 0x100) == 0):
                 self.dwFlags = self.dwFlags | MOUSEEVENTF_LEFTDOWN
                 print("pressing left button")
             else:
                 print("left button already pressed")
         else:
-            if((ctypes.windll.user32.GetKeyState(VK_LBUTTON) & 0x8000) != 0):
+            if((windll.user32.GetKeyState(VK_LBUTTON) & 0x100) != 0):
                 self.dwFlags = self.dwFlags | MOUSEEVENTF_LEFTUP
                 print("releasing left button")
             else:
                 print("left button already released")
 
         if (pressRight):
-            if ((ctypes.windll.user32.GetKeyState(VK_RBUTTON) & 0x8000) == 0):
+            if ((windll.user32.GetKeyState(VK_RBUTTON) & 0x8000) == 0):
                 self.dwFlags = self.dwFlags | MOUSEEVENTF_RIGHTDOWN
                 print("pressing right button")
             else:
                 print("right button already pressed")
         else:
-            if ((ctypes.windll.user32.GetKeyState(VK_RBUTTON) & 0x8000) != 0):
+            if ((windll.user32.GetKeyState(VK_RBUTTON) & 0x8000) != 0):
                 self.dwFlags = self.dwFlags | MOUSEEVENTF_RIGHTUP
                 print("releasing right button")
             else:
@@ -119,7 +119,7 @@ class Mouse:
             # UINT cInputs = number of structs in pInput,
             # LPINPUT pInputs = pointer to array of INPUT structs
             # int cbSize = size (in bytes) of an INPUT struct
-            ctypes.windll.user32.SendInput(UINT(1), self.inputStructPtr, INPUT_STRUCT_BYTES)
+            windll.user32.SendInput(UINT(1), self.inputStructPtr, INPUT_BYTES)
 
             #check for horizontal scrolling, update mouse a second time
             if(dxScroll != 0):
@@ -127,6 +127,6 @@ class Mouse:
                 # repeat the input change with dxScroll replacing dyScroll
                 keyboard.updateKey("SHIFT", True)
                 self.inputStructPtr.contents.dummyUnion.mouseInput.mouseData = DWORD(dxScroll)
-                ctypes.windll.user32.SendInput(UINT(1), self.inputStructPtr, INPUT_STRUCT_BYTES)
+                windll.user32.SendInput(UINT(1), self.inputStructPtr, INPUT_BYTES)
                 keyboard.updateKey("SHIFT", False)
         print()

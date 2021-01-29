@@ -1,7 +1,6 @@
 from WINDOWS_API_STRUCTS import UINT, LONG, WORD, DWORD, ULONG_PTR, INPUT_KEYBOARD
-from WINDOWS_API_STRUCTS import KEYBDINPUT, DUMMYUNIONNAME, INPUT, LPINPUT, INPUT_STRUCT_BYTES
-from WINDOWS_API_STRUCTS import ARRAY_SIZE, INPUT_ARRAY, PTR_INPUT_ARRAY
-import ctypes
+from WINDOWS_API_STRUCTS import KEYBDINPUT, DUMMYUNIONNAME, INPUT, LPINPUT, INPUT_BYTES
+from WINDOWS_API_STRUCTS import windll
 # from WINDOWS_VIRTUAL_KEY_CODES import VK, VK_NUMS, VK_ALPHABET, VK_LWIN, VK_CONTROL
 from WINDOWS_VIRTUAL_KEY_CODES import *
 import time
@@ -13,14 +12,8 @@ KEYEVENTF_UNICODE = 0x0004  # specifies unicode char in wScan and wVk will be ig
 
 # use a single INPUT struct so its memory can be reused when the mouse is updated multiple times
 inputStructPtr = LPINPUT(INPUT(INPUT_KEYBOARD, DUMMYUNIONNAME(ki = KEYBDINPUT())))
-inputStructArrPtr = INPUT_ARRAY()
-
 dwFlags = 0
 class Keyboard:
-
-    def __init__(self):
-        for i in range(0,ARRAY_SIZE):
-            inputStructArrPtr[i] = INPUT(INPUT_KEYBOARD, DUMMYUNIONNAME(ki = KEYBDINPUT()))
 
     """
         List of Recognized Keynames (120 so far):
@@ -238,7 +231,7 @@ class Keyboard:
             #complies with https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getkeystate
             #test if high order bit (left most bit) is a 1
             #if so, key is down aka pressed down
-            return bool(ctypes.windll.user32.GetKeyState(VK_code) & 0x8000)
+            return bool(windll.user32.GetKeyState(VK_code) & 0x8000)
 
     def updateKey(self,keyString, pressDown):
         #get VK code from names of keys
@@ -260,28 +253,19 @@ class Keyboard:
                 inputStructPtr.contents.dummyUnion.keyboardInput.dwFlags = DWORD(KEYEVENTF_KEYUP)
 
             inputStructPtr.contents.dummyUnion.keyboardInput.time = DWORD(0)  # set time to 0 so system assigns its own time
-            inputStructPtr.contents.dummyUnion.keyboardInput.dwExtraInfo = ULONG_PTR(LONG(ctypes.windll.user32.GetMessageExtraInfo()))  # get data for dwExtraInfo from calling GetMessageExtraInfo())
+            inputStructPtr.contents.dummyUnion.keyboardInput.dwExtraInfo = ULONG_PTR(LONG(windll.user32.GetMessageExtraInfo()))  # get data for dwExtraInfo from calling GetMessageExtraInfo())
 
-            ctypes.windll.user32.SendInput(UINT(1), inputStructPtr, INPUT_STRUCT_BYTES)
+            windll.user32.SendInput(UINT(1), inputStructPtr, INPUT_BYTES)
             print("keyString '%s' has VK_code %x, key is pressed" % (keyString, VK_code))
 
-    def typeText(self, text):
-        i = 0
+    def typeText(self,text):
+        inputStructPtr.contents.dummyUnion.keyboardInput.wVk = WORD(0)
+        inputStructPtr.contents.dummyUnion.keyboardInput.dwFlags = KEYEVENTF_UNICODE #specify that info has unicode char
+        inputStructPtr.contents.dummyUnion.keyboardInput.time = DWORD(0) #set time to 0 so system assigns its own time
+        inputStructPtr.contents.dummyUnion.keyboardInput.dwExtraInfo = ULONG_PTR(LONG(windll.user32.GetMessageExtraInfo())) # get data for dwExtraInfo from calling GetMessageExtraInfo())
+
         for char in text:
-            print("typing char '%c' = %x" %(text[i], ord(text[i])))
-            inputStructArrPtr[i].dummyUnion.keyboardInput.wVk = WORD(0)
-            inputStructArrPtr[i].dummyUnion.keyboardInput.wScan = WORD(ord(text[i]))  # unicode char to be typed
-            inputStructArrPtr[i].dummyUnion.keyboardInput.dwFlags = KEYEVENTF_UNICODE #specify that info has unicode char
-            inputStructArrPtr[i].dummyUnion.keyboardInput.time = DWORD(0) #set time to 0 so system assigns its own time
-            inputStructArrPtr[i].dummyUnion.keyboardInput.dwExtraInfo = ULONG_PTR(LONG(ctypes.windll.user32.GetMessageExtraInfo())) # get data for dwExtraInfo from calling GetMessageExtraInfo())
-            i+=1
-
-            if(i % ARRAY_SIZE == 0):
-                # ask OS to type unicode char for you
-                ctypes.windll.user32.SendInput(UINT(ARRAY_SIZE), inputStructArrPtr, INPUT_STRUCT_BYTES)
-                i = 0
-
-        #test if array is filled with less than 50 elements (i does not get reset to 0)
-        if(i > 0):
-            # ask OS to type unicode char for you
-            ctypes.windll.user32.SendInput(UINT(i), inputStructArrPtr, INPUT_STRUCT_BYTES)
+            print("typing char '%c' = %x" %(char, ord(char)))
+            inputStructPtr.contents.dummyUnion.keyboardInput.wScan = WORD(ord(char))# unicode char to be typed
+            windll.user32.SendInput(UINT(1), inputStructPtr, INPUT_BYTES) #ask OS to type unicode char for you
+            time.sleep(0.02)
