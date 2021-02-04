@@ -271,21 +271,30 @@ class Keyboard:
             time.sleep(0.05)
 
     """
-    will use On Screen Keyboard instead of Touch keyboard because not all computers have a touch screen
-    and therefore may be missing a Touch keyboard feature.
-    Also the Touch keyboard has no keyboard shortcut and can't be enabled using the windows API directly
-    https://superuser.com/questions/1186075/shortcut-to-open-windows-10-on-screen-keyboard-not-osk-exe
-    https://support.microsoft.com/en-us/windows/open-the-touch-keyboard-a1084c2e-bb51-4a95-41cd-1457f8bd7d10
+    Will use On Screen Keyboard instead of Touch keyboard because:
+    
+        1. Not all computers have a touch screen and therefore may be missing a Touch keyboard feature.
+        
+        2. Also the Touch keyboard has no keyboard shortcut and can't be enabled using the windows API directly, it needs a few mouse clicks on the taskbar
+            https://superuser.com/questions/1186075/shortcut-to-open-windows-10-on-screen-keyboard-not-osk-exe
+            https://support.microsoft.com/en-us/windows/open-the-touch-keyboard-a1084c2e-bb51-4a95-41cd-1457f8bd7d10
+            https://stackoverflow.com/questions/39618127/programmatically-open-on-screen-keyboard-in-uwp
+        
+        3. The Touch Keyboard will resize the PyCharm IDE window to fill the top half of the screen, but the On Screen Keyboard won't
+            Turns out the Touch Keyboard does not play nice with apps that weren't designed to handle touch screen inputs
+        
+    Note: Both the On Screen Keyboard and the Touch Keyboard have predictive text suggestions
     
     On-Screen Keyboard Enable Settings:
     https://support.microsoft.com/en-us/windows/use-the-on-screen-keyboard-osk-to-type-ecbb5e08-5b4e-d8c8-f794-81dbf896267a
     
-    Does the opposite of ebabling an On Screen Keyboard:
+    Keyboard Preference parameter in Windows API Does the opposite of enabling an On Screen Keyboard:
     https://docs.microsoft.com/en-us/windows/win32/winauto/keyboard-preference-parameter
     
+    IMPORTANT NOTE: Turns Out the On-Screen Keyboard does not need to be enabled, only the Touch Keyboard does
     """
-    def enableOnScreenKeyboard(visible):
-        return
+    #def enableOnScreenKeyboard(visible):
+    #    return
 
     """
     The On Screen Keyboard MUST BE ENABLED before you can toggle it with the shortcut in this function
