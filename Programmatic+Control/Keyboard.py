@@ -269,3 +269,35 @@ class Keyboard:
             inputStructPtr.contents.dummyUnion.keyboardInput.wScan = WORD(ord(char))# unicode char to be typed
             windll.user32.SendInput(UINT(1), inputStructPtr, INPUT_BYTES) #ask OS to type unicode char for you
             time.sleep(0.05)
+
+    """
+    will use On Screen Keyboard instead of Touch keyboard because not all computers have a touch screen
+    and therefore may be missing a Touch keyboard feature.
+    Also the Touch keyboard has no keyboard shortcut and can't be enabled using the windows API directly
+    https://superuser.com/questions/1186075/shortcut-to-open-windows-10-on-screen-keyboard-not-osk-exe
+    https://support.microsoft.com/en-us/windows/open-the-touch-keyboard-a1084c2e-bb51-4a95-41cd-1457f8bd7d10
+    
+    On-Screen Keyboard Enable Settings:
+    https://support.microsoft.com/en-us/windows/use-the-on-screen-keyboard-osk-to-type-ecbb5e08-5b4e-d8c8-f794-81dbf896267a
+    
+    Does the opposite of ebabling an On Screen Keyboard:
+    https://docs.microsoft.com/en-us/windows/win32/winauto/keyboard-preference-parameter
+    
+    """
+    def enableOnScreenKeyboard(visible):
+        return
+
+    """
+    The On Screen Keyboard MUST BE ENABLED before you can toggle it with the shortcut in this function
+    
+    Shortcut Info:
+    https://www.tenforums.com/tutorials/115495-turn-off-screen-keyboard-windows-10-a.html
+    """
+    def toggleOnScreenKeyboard(self):
+        # Windows key (L/R) + CTRL key (any) + letter O key
+        self.updateKey("CTRL", True)
+        self.updateKey("RIGHT WINDOWS", True)
+        self.updateKey("O", True)
+        self.updateKey("O", False)
+        self.updateKey("RIGHT WINDOWS", False)
+        self.updateKey("CTRL", False)
