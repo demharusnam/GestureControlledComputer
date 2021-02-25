@@ -217,7 +217,7 @@ class Keyboard:
                 VK_code = VK_BACK #BACKSPACE
             elif(keyName == "SEPARATOR"):
                 VK_code = VK_SEPARATOR #SEPARATOR
-        elif(chars == 9):
+        elif(chars == 10):
             if(keyName == "PRINTSCREEN"):
                 VK_code = VK_SNAPSHOT #PRINTSCREEN
 
