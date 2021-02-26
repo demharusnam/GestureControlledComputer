@@ -278,7 +278,6 @@ class Keyboard:
         "CLEAR" : VK_CLEAR,  # CLEAR
         "ENTER" : VK_RETURN,  # ENTER
         "PRINT" : VK_PRINT,  # PRINT
-        "SCROLL" : VK_SCROLL,  # SCROLL
         "SHIFT" : {
                     "default" : VK_SHIFT,  # SHIFT
                     "LEFT" : VK_LSHIFT,  # LEFT SHIFT
@@ -292,6 +291,7 @@ class Keyboard:
         "INSERT" : VK_INSERT,  # INSERT
         "DELETE" : VK_DELETE,  # DELETE
         "DIVIDE" : VK_DIVIDE,  # DIVIDE
+        "SCROLL": VK_SCROLL,  # SCROLL
         "SELECT" : VK_SELECT  # SELECT
     }
 
