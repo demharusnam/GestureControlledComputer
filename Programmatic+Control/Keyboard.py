@@ -333,7 +333,7 @@ class Keyboard:
     ]
 
     def __getVKCodeFast(self,keyString):
-        print("keyString is "+keyString)
+        ###print("keyString is "+keyString)
         VK_code = 0x00  # this keycode it a placeholder, it is not used in Windows for any known virtual keys
 
         #extract the main key name from the last part of keyname from string
@@ -354,8 +354,10 @@ class Keyboard:
                 i = ord(keyName)
                 if ((0x30 <= i <= 0x39) or (0x41 <= i <= 0x5A)):
                     VK_code = i
+                    return VK_code
             except:
-                print(keyName+" is not alphanumeric")
+                ###print(keyName+" is not alphanumeric")
+                pass
 
         elif(chars == 2 or chars == 3): #check through all 2 letter/char key name special cases
             # comparing just 1st or 2nd chars may trigger a false match when ignoring the 3rd char
@@ -365,7 +367,9 @@ class Keyboard:
                     if(1 <= n <= 24):
                         VK_code = 0x69+n
                 except:
-                    print(keyName+" is not an F key between 1 and 24")
+                    ###print(keyName+" is not an F key between 1 and 24")
+                    pass
+                return VK_code
 
         elif(chars == 7): #check through all 7 letter/char key name special cases
             if (keyName[0:6] == "NUMPAD"):
@@ -374,39 +378,40 @@ class Keyboard:
                     if(0<= num <= 9):
                         VK_code = 0x60 + num
                 except:
-                    print(keyName+" is not a NUMPAD key between 0 and 9")
+                    ###print(keyName+" is not a NUMPAD key between 0 and 9")
+                    pass
+                return VK_code
 
         #check if no special cases for key code occured, retrieve dict based on # of chars in keyName
-        if(VK_code == 0x00 and ((1 <= chars <= 9) or (chars == 11))):
+        if((1 <= chars <= 9) or (chars == 11)):
             keyNames_dict = self.keyNames_byLength[chars]
-        else:
-            print("Special case found for keyName "+keyName)
+            # print("Retrieved dict with " + str(chars) + " letter words")
 
-        #search keyName dict if any dict was selected based on # of chars in keyName
-        if(keyNames_dict != None):
-            print("Retrieved dict with " + str(chars) + " letter words")
-
+            # search keyName dict if any dict was selected based on # of chars in keyName
             try:
                 VK_code = keyNames_dict[keyName]
-                print("Found entry in dict for keyName " + keyName)
+                ###print("Found entry in dict for keyName " + keyName)
             except:
-                print("No entry in dict for keyName "+keyName)
+                ###print("No entry in dict for keyName " + keyName)
+                return VK_code
 
             if (type(VK_code) is dict):  # checks if dict entry is another dict
-                print("Entry in dict was another dict")
+                ###print("Entry in dict was another dict")
 
-                if (prefix == None): #if dict entry is another dict, but no second part of key name, use default value
+                if (prefix == None):  # if dict entry is another dict, but no second part of key name, use default value
                     try:
                         VK_code = VK_code["default"]
                     except:
                         VK_code = 0x00
-                        print("No default value for "+keyName+" found, needs a prefix")
-                else: #otherwise search other dict with preceding part of key name
+                        ###print("No default value for " + keyName + " found, needs a prefix")
+                else:  # otherwise search other dict with preceding part of key name
                     try:
                         VK_code = VK_code[prefix]
                     except:
                         VK_code = 0x00
-                        print("No key in dict for prefix "+prefix)
+                        ###print("No key in dict for prefix " + prefix)
+        else:
+            print("Special case found for keyName "+keyName)
 
         return VK_code
 

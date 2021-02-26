@@ -41,34 +41,42 @@ keyStringList.append('<')
 keyStringList.append('>')
 keyStringList.append('=')
 keyStringList.append('a') #is lowercase version of key with CAPITAL name
-keyStringList.append('NUMPAD@')
-keyStringList.append('LOCK LOCK')
-keyStringList.append('LOCK')
+keyStringList.append('NUMPAD@') #wrong numpad key
+keyStringList.append('NUMPAD') #missing numpad key
+keyStringList.append('LOCK LOCK') #wrong prefix (CAPS lOCK/NUM LOCK)
+keyStringList.append('LOCK') #missing prefix (CAPS lOCK/NUM LOCK)
 
 """
 for string in keyStringList:
     print(string)
 """
 
-ti = time.time()
 for string in keyStringList:
+    print("Testing keyString "+string)
     try:
         VK_code = kb._Keyboard__getVKCode(string)
-        print(string+" = "+hex(VK_code))
+        print("old returns "+hex(VK_code))
     except:
-        print("Error in VKCode()")
-        break
+        print("Error in __getVKCode()*********************************")
+    try:
+        VK_code = kb._Keyboard__getVKCodeFast(string)
+        print("new returns " + hex(VK_code))
+    except:
+        print("Error in __getVKCodeFast()*****************************")
+        pass
+
+
+ti = time.time()
+for i in range(0,500):
+    for string in keyStringList:
+        VK_code = kb._Keyboard__getVKCode(string)
 tf = time.time()
 print("normal __getVKCode() over all possible valid inputs = "+str(tf-ti))
 
 
 ti = time.time()
-for string in keyStringList:
-    try:
+for i in range(0,500):
+    for string in keyStringList:
         VK_code = kb._Keyboard__getVKCodeFast(string)
-        print(string + " = " + hex(VK_code))
-    except:
-        print("Error in VKCodeFast()")
-        break
 tf = time.time()
 print("__getVKCodeFast() over all possible valid inputs = "+str(tf-ti))
