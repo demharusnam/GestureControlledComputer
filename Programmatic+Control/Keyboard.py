@@ -381,9 +381,9 @@ class Keyboard:
 
         #search keyName dict if any dict was selected based on # of chars in keyName
         if(keyNames_dict != None):
-            VK_code = self.keyNames_dict[keyName]
+            VK_code = keyNames_dict[keyName]
             if (type(VK_code) is dict):  # checks if dict entry is another dict
-                if (prefix != None): #if dict entry is another dict, but no second part of key name, use default value
+                if (prefix == None): #if dict entry is another dict, but no second part of key name, use default value
                     VK_code = VK_code["default"]
                 else: #otherwise search other dict with preceding part of key name
                     VK_code = VK_code[prefix]
