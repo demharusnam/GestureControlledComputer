@@ -333,6 +333,7 @@ class Keyboard:
     ]
 
     def __getVKCodeFast(self,keyString):
+        print("keyString is "+keyString)
         VK_code = 0x00  # this keycode it a placeholder, it is not used in Windows for any known virtual keys
 
         #extract the main key name from the last part of keyname from string
@@ -349,40 +350,63 @@ class Keyboard:
         if (chars == 1): #check through all 1 letter key name special cases
             # implement the ASCII code for all numbers and all capital letters https://docs.microsoft.com/en-us/windows/win32/learnwin32/keyboard-input
             # if keyName btwn 0(0x30) to 9(0x39) or A(0x41) to Z(0x5A), use the number of its ASCII code as the key code
-            i = ord(keyName)
-            if ((0x30 <= i <= 0x39) or (0x41 <= i <= 0x5A)):
-                VK_code = i
+            try:
+                i = ord(keyName)
+                if ((0x30 <= i <= 0x39) or (0x41 <= i <= 0x5A)):
+                    VK_code = i
+            except:
+                print(keyName+" is not alphanumeric")
 
         elif(chars == 2 or chars == 3): #check through all 2 letter/char key name special cases
             # comparing just 1st or 2nd chars may trigger a false match when ignoring the 3rd char
-            if(keyName[0] == 'F'): #F1 to F9
-                n = int(keyName[1:])
-                if(1 <= n <= 24):
-                    VK_code = 0x69+n
+            if(keyName[0] == 'F'): #F1 to F24
+                try:
+                    n = int(keyName[1:])
+                    if(1 <= n <= 24):
+                        VK_code = 0x69+n
+                except:
+                    print(keyName+" is not an F key between 1 and 24")
 
         elif(chars == 7): #check through all 7 letter/char key name special cases
             if (keyName[0:6] == "NUMPAD"):
-                num = int(keyName[6])  # extract number part from NUMPAD name
-                if(0<= num <= 9):
-                    VK_code = 0x60 + num
+                try:
+                    num = int(keyName[6])  # extract number part from NUMPAD name
+                    if(0<= num <= 9):
+                        VK_code = 0x60 + num
+                except:
+                    print(keyName+" is not a NUMPAD key between 0 and 9")
 
         #check if no special cases for key code occured, retrieve dict based on # of chars in keyName
         if(VK_code == 0x00 and ((1 <= chars <= 9) or (chars == 11))):
             keyNames_dict = self.keyNames_byLength[chars]
-        #else:
-            #print("Special case found for keyName "+keyName)
+        else:
+            print("Special case found for keyName "+keyName)
 
         #search keyName dict if any dict was selected based on # of chars in keyName
         if(keyNames_dict != None):
-            VK_code = keyNames_dict[keyName]
+            print("Retrieved dict with " + str(chars) + " letter words")
+
+            try:
+                VK_code = keyNames_dict[keyName]
+                print("Found entry in dict for keyName " + keyName)
+            except:
+                print("No entry in dict for keyName "+keyName)
+
             if (type(VK_code) is dict):  # checks if dict entry is another dict
+                print("Entry in dict was another dict")
+
                 if (prefix == None): #if dict entry is another dict, but no second part of key name, use default value
-                    VK_code = VK_code["default"]
+                    try:
+                        VK_code = VK_code["default"]
+                    except:
+                        VK_code = 0x00
+                        print("No default value for "+keyName+" found, needs a prefix")
                 else: #otherwise search other dict with preceding part of key name
-                    VK_code = VK_code[prefix]
-            #else:
-                #print("VK_code "+str(VK_code)+" has type "+str(type(VK_code)))
-            #print("Dict with chars of length "+str(chars)+" found")
+                    try:
+                        VK_code = VK_code[prefix]
+                    except:
+                        VK_code = 0x00
+                        print("No key in dict for prefix "+prefix)
 
         return VK_code
 

@@ -19,6 +19,32 @@ for dict in [kb.keyNames_byLength[i] for i in indices]:
         else:
             keyStringList.append(keyName)
 
+#adding special case keynames
+#alphanumeric (0x30-0x39),(0x41-0x5A)
+for i in range(0x30,0x3A):
+    keyStringList.append(chr(i))
+
+for i in range(0x41,0x5B):
+    keyStringList.append(chr(i))
+
+#F1-F24
+for i in range(1,25):
+    keyStringList.append("F"+str(i))
+
+#NUMPAD0-NUMPAD9
+for i in range(0,10):
+    keyStringList.append("NUMPAD"+str(i))
+
+#inputs which shouldn't work (normal key+SHIFT)
+keyStringList.append(':')
+keyStringList.append('<')
+keyStringList.append('>')
+keyStringList.append('=')
+keyStringList.append('a') #is lowercase version of key with CAPITAL name
+keyStringList.append('NUMPAD@')
+keyStringList.append('LOCK LOCK')
+keyStringList.append('LOCK')
+
 """
 for string in keyStringList:
     print(string)
