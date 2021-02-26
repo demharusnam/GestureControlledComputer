@@ -353,19 +353,12 @@ class Keyboard:
             if ((0x30 <= i <= 0x39) or (0x41 <= i <= 0x5A)):
                 VK_code = i
 
-        elif(chars == 2): #check through all 2 letter/char key name special cases
-            #do keys F1 to F12 and the Fn key?
+        elif(chars == 2 or chars == 3): #check through all 2 letter/char key name special cases
+            # comparing just 1st or 2nd chars may trigger a false match when ignoring the 3rd char
             if(keyName[0] == 'F'): #F1 to F9
-                n = int(keyName[1])
-                if(1 <= n <= 9):
+                n = int(keyName[1:])
+                if(1 <= n <= 24):
                     VK_code = 0x69+n
-
-        elif(chars == 3): #check through all 3 letter/char key name special cases
-            #comparing just 1st or 2nd chars may trigger a false match when ignoring the 3rd char
-            if (keyName[0] == 'F'):  # F10 to F24
-                n = int(keyName[1:3]) #assume 2nd and 3rd chars of string form number
-                if (10 <= n <= 24):
-                    VK_code = 0x69 + n
 
         elif(chars == 7): #check through all 7 letter/char key name special cases
             if (keyName[0:6] == "NUMPAD"):
@@ -376,8 +369,8 @@ class Keyboard:
         #check if no special cases for key code occured, retrieve dict based on # of chars in keyName
         if(VK_code == 0x00 and ((1 <= chars <= 9) or (chars == 11))):
             keyNames_dict = self.keyNames_byLength[chars]
-        else:
-            print("Special case found for keyName "+keyName)
+        #else:
+            #print("Special case found for keyName "+keyName)
 
         #search keyName dict if any dict was selected based on # of chars in keyName
         if(keyNames_dict != None):
@@ -387,9 +380,9 @@ class Keyboard:
                     VK_code = VK_code["default"]
                 else: #otherwise search other dict with preceding part of key name
                     VK_code = VK_code[prefix]
-            else:
-                print("VK_code "+str(VK_code)+" has type "+str(type(VK_code)))
-            print("Dict with chars of length "+str(chars)+" found")
+            #else:
+                #print("VK_code "+str(VK_code)+" has type "+str(type(VK_code)))
+            #print("Dict with chars of length "+str(chars)+" found")
 
         return VK_code
 
