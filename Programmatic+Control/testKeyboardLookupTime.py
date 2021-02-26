@@ -5,7 +5,8 @@ kb = Keyboard.Keyboard()
 
 #get list of key names
 keyStringList = []
-for dict in kb.keyNames_byLength[1:10+1]:
+indices = [1,2,3,4,5,6,7,8,9,11]
+for dict in [kb.keyNames_byLength[i] for i in indices]:
     for (keyName, VK_code) in dict.items():
         #print("VK_code is dict? = "+str(type(VK_code) is dict)+", VK_code is: "+str(VK_code))
         if(type(VK_code) is not int):
@@ -27,7 +28,7 @@ ti = time.time()
 for string in keyStringList:
     try:
         VK_code = kb._Keyboard__getVKCode(string)
-        print(string+" = "+str(VK_code))
+        print(string+" = "+hex(VK_code))
     except:
         print("Error in VKCode()")
         break
@@ -39,7 +40,7 @@ ti = time.time()
 for string in keyStringList:
     try:
         VK_code = kb._Keyboard__getVKCodeFast(string)
-        print(string + " = " + str(VK_code))
+        print(string + " = " + hex(VK_code))
     except:
         print("Error in VKCodeFast()")
         break

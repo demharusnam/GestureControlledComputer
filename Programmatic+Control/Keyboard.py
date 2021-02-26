@@ -117,7 +117,7 @@ class Keyboard:
                     VK_code = 0x69 + n
             elif(keyName == "ADD"):
                 VK_code = VK_ADD #ADD
-            elif(keyName[1] == "ALT"):
+            elif(keyName == "ALT"):
                 if(len(keyParts) == 1): #check if no modifier part to key name to use default ALT key
                     VK_code = VK_MENU #ALT
                 else:
@@ -171,8 +171,6 @@ class Keyboard:
                 VK_code = VK_RETURN  #ENTER
             elif (keyName == "PRINT"):
                 VK_code = VK_PRINT #PRINT
-            elif (keyName == "SCROLL"):
-                VK_code = VK_SCROLL #SCROLL
             elif (keyName == "SHIFT"):
                 if(len(keyParts) == 1): #check if no modifier words, use default SHIFT key
                     VK_code = VK_SHIFT #SHIFT
@@ -193,6 +191,8 @@ class Keyboard:
                 VK_code = VK_DELETE #DELETE
             elif(keyName == "DIVIDE"):
                 VK_code = VK_DIVIDE #DIVIDE
+            elif (keyName == "SCROLL"):
+                VK_code = VK_SCROLL #SCROLL
             elif(keyName == "SELECT"):
                 VK_code = VK_SELECT #SELECT
         elif(chars == 7): #check through all 7 letter/char key names
@@ -217,7 +217,7 @@ class Keyboard:
                 VK_code = VK_BACK #BACKSPACE
             elif(keyName == "SEPARATOR"):
                 VK_code = VK_SEPARATOR #SEPARATOR
-        elif(chars == 10):
+        elif(chars == 11):
             if(keyName == "PRINTSCREEN"):
                 VK_code = VK_SNAPSHOT #PRINTSCREEN
 
@@ -313,7 +313,7 @@ class Keyboard:
         "SEPARATOR" : VK_SEPARATOR  # SEPARATOR
     }
 
-    keyNames_len10 = {
+    keyNames_len11 = {
         "PRINTSCREEN" : VK_SNAPSHOT  # PRINTSCREEN
     }
 
@@ -328,7 +328,8 @@ class Keyboard:
         keyNames_len7,
         keyNames_len8,
         keyNames_len9,
-        keyNames_len10
+        None,
+        keyNames_len11
     ]
 
     def __getVKCodeFast(self,keyString):
@@ -373,7 +374,7 @@ class Keyboard:
                     VK_code = 0x60 + num
 
         #check if no special cases for key code occured, retrieve dict based on # of chars in keyName
-        if(VK_code == 0x00 and (1 <= chars <= 10)):
+        if(VK_code == 0x00 and ((1 <= chars <= 9) or (chars == 11))):
             keyNames_dict = self.keyNames_byLength[chars]
         else:
             print("Special case found for keyName "+keyName)
