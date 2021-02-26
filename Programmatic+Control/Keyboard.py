@@ -76,10 +76,14 @@ class Keyboard:
         if (chars == 1): #check through all 1 letter key names
             # implement the ASCII code for all numbers and all capital letters https://docs.microsoft.com/en-us/windows/win32/learnwin32/keyboard-input
             # if keyName btwn 0(0x30) to 9(0x39) or A(0x41) to Z(0x5A), use the number of its ASCII code as the key code
-            i = ord(keyName)
-            if ((0x30 <= i <= 0x39) or (0x41 <= i <= 0x5A)):
-                VK_code = i
-            elif(keyName == ';'):
+            try:
+                i = ord(keyName)
+                if ((0x30 <= i <= 0x39) or (0x41 <= i <= 0x5A)):
+                    VK_code = i
+            except:
+                return
+
+            if(keyName == ';'):
                 VK_code = VK_OEM_1
             elif(keyName == '+'):
                 VK_code = VK_OEM_PLUS
@@ -104,17 +108,23 @@ class Keyboard:
         elif(chars == 2): #check through all 2 letter/char key names
             #do keys F1 to F12 and the Fn key?
             if(keyName[0] == 'F'): #F1 to F9
-                n = int(keyName[1])
-                if(1 <= n <= 9):
-                    VK_code = 0x69+n
+                try:
+                    n = int(keyName[1])
+                    if(1 <= n <= 9):
+                        VK_code = 0x69+n
+                except:
+                    pass
             elif(keyName == "UP" and keyParts[0] == "PAGE"):
                 VK_code = VK_PRIOR  # PAGE UP
         elif(chars == 3): #check through all 3 letter/char key names
             #comparing just 1st or 2nd chars may trigger a false match when ignoring the 3rd char
             if (keyName[0] == 'F'):  # F10 to F24
-                n = int(keyName[1:3]) #assume 2nd and 3rd chars of string form number
-                if (10 <= n <= 24):
-                    VK_code = 0x69 + n
+                try:
+                    n = int(keyName[1:3]) #assume 2nd and 3rd chars of string form number
+                    if (10 <= n <= 24):
+                        VK_code = 0x69 + n
+                except:
+                    pass
             elif(keyName == "ADD"):
                 VK_code = VK_ADD #ADD
             elif(keyName == "ALT"):
@@ -199,8 +209,11 @@ class Keyboard:
             if(keyName == "DECIMAL"):
                 VK_code = VK_DECIMAL #DECIMAL
             elif(keyName[0:6] == "NUMPAD"):
-                num = int(keyName[6]) #extract number part from NUMPAD name
-                VK_code = 0x60 + num
+                try:
+                    num = int(keyName[6]) #extract number part from NUMPAD name
+                    VK_code = 0x60 + num
+                except:
+                    pass
             elif(keyName == "WINDOWS"):
                 keyName = keyParts[0]
                 if(keyName == "LEFT"):

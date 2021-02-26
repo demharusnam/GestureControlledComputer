@@ -46,11 +46,7 @@ keyStringList.append('NUMPAD') #missing numpad key
 keyStringList.append('LOCK LOCK') #wrong prefix (CAPS lOCK/NUM LOCK)
 keyStringList.append('LOCK') #missing prefix (CAPS lOCK/NUM LOCK)
 
-"""
-for string in keyStringList:
-    print(string)
-"""
-
+print("Testing ability to handle weird inputs without stopping program")
 for string in keyStringList:
     print("Testing keyString "+string)
     try:
@@ -65,18 +61,25 @@ for string in keyStringList:
         print("Error in __getVKCodeFast()*****************************")
         pass
 
-
+rounds = 1000
+total_strings = rounds*len(keyStringList)
+print("\nTesting elapsed time of each method for "+str(total_strings)+" input strings")
 ti = time.time()
-for i in range(0,500):
+for i in range(0,rounds):
     for string in keyStringList:
         VK_code = kb._Keyboard__getVKCode(string)
 tf = time.time()
-print("normal __getVKCode() over all possible valid inputs = "+str(tf-ti))
-
+elapsed_time = tf-ti
+print("__getVKCode() performance (seconds):")
+print("total time: "+str(elapsed_time))
+print("time per string: "+str(elapsed_time/total_strings))
 
 ti = time.time()
-for i in range(0,500):
+for i in range(0,rounds):
     for string in keyStringList:
         VK_code = kb._Keyboard__getVKCodeFast(string)
 tf = time.time()
-print("__getVKCodeFast() over all possible valid inputs = "+str(tf-ti))
+elapsed_time = tf-ti
+print("__getVKCodeFast() performance (seconds):")
+print("total time: "+str(elapsed_time))
+print("time per string: "+str(elapsed_time/total_strings))
