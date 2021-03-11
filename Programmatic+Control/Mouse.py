@@ -46,7 +46,7 @@ class Mouse:
     # must normalize x and y if using absolute coordinates
     # https://stackoverflow.com/questions/49026921/sendinput-always-moves-mouse-pointer-to-left-top-corner
     def __normalizePos(self, dxPos, dyPos):
-        print("screen width = %d px, screen height = %d px" % (self.screenWidth, self.screenHeight))
+        #print("screen width = %d px, screen height = %d px" % (self.screenWidth, self.screenHeight))
         #screen coords go from 0 to 65535 in both directions
         return (round(dxPos*65535/self.screenWidth), round(dyPos*65535/self.screenHeight))
 
@@ -59,12 +59,12 @@ class Mouse:
         if (absPos):
             if((x > -1) or (y > -1)):
                 self.dwFlags = self.dwFlags | MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_VIRTUALDESK | MOUSEEVENTF_MOVE
-                print("mouse will move to pos (%s, %s)" % (x, y))
+                #print("mouse will move to pos (%s, %s)" % (x, y))
                 (x,y) = self.__normalizePos(x,y)
 
         elif((x != 0) or (y != 0)): #if the x or y positions of the mouse changed
             self.dwFlags = self.dwFlags | MOUSEEVENTF_MOVE
-            print("mouse will change pos by (%s, %s)" % (x,y))
+            #print("mouse will change pos by (%s, %s)" % (x,y))
 
         if((dyScroll != 0) or (dxScroll != 0)):
             self.dwFlags = self.dwFlags | MOUSEEVENTF_WHEEL
@@ -72,28 +72,32 @@ class Mouse:
         if(pressLeft):
             if ((windll.user32.GetKeyState(VK_LBUTTON) & 0x100) == 0):
                 self.dwFlags = self.dwFlags | MOUSEEVENTF_LEFTDOWN
-                print("pressing left button")
+                #print("pressing left button")
             else:
-                print("left button already pressed")
+                #print("left button already pressed")
+                pass
         else:
             if((windll.user32.GetKeyState(VK_LBUTTON) & 0x100) != 0):
                 self.dwFlags = self.dwFlags | MOUSEEVENTF_LEFTUP
-                print("releasing left button")
+                #print("releasing left button")
             else:
-                print("left button already released")
+                #print("left button already released")
+                pass
 
         if (pressRight):
             if ((windll.user32.GetKeyState(VK_RBUTTON) & 0x8000) == 0):
                 self.dwFlags = self.dwFlags | MOUSEEVENTF_RIGHTDOWN
-                print("pressing right button")
+                #print("pressing right button")
             else:
-                print("right button already pressed")
+                #print("right button already pressed")
+                pass
         else:
             if ((windll.user32.GetKeyState(VK_RBUTTON) & 0x8000) != 0):
                 self.dwFlags = self.dwFlags | MOUSEEVENTF_RIGHTUP
-                print("releasing right button")
+                #print("releasing right button")
             else:
-                print("right button already released")
+                #print("right button already released")
+                pass
 
         #if any part of mouse should be changed, dwFlags will be non-zero
         if(self.dwFlags != 0):
@@ -110,7 +114,7 @@ class Mouse:
 
             #check for vertical scrolling
             if(dyScroll != 0):
-                print("scrolling vertically by %s" % (dyScroll))
+                #print("scrolling vertically by %s" % (dyScroll))
                 self.inputStructPtr.contents.dummyUnion.mouseInput.mouseData = DWORD(dyScroll)
 
             #update mouse
@@ -123,10 +127,10 @@ class Mouse:
 
             #check for horizontal scrolling, update mouse a second time
             if(dxScroll != 0):
-                print("scrolling horizontally by %s" % (dyScroll))
+                #print("scrolling horizontally by %s" % (dyScroll))
                 # repeat the input change with dxScroll replacing dyScroll
                 keyboard.updateKey("SHIFT", True)
                 self.inputStructPtr.contents.dummyUnion.mouseInput.mouseData = DWORD(dxScroll)
                 windll.user32.SendInput(UINT(1), self.inputStructPtr, INPUT_BYTES)
                 keyboard.updateKey("SHIFT", False)
-        print()
+        #print()

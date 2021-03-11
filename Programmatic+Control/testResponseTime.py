@@ -1,5 +1,8 @@
 import time
 import Keyboard
+import Mouse
+
+""" KEYBOARD LOOKUP TIME TESTING """
 
 kb = Keyboard.Keyboard()
 
@@ -71,8 +74,8 @@ for i in range(0,rounds):
 tf = time.time()
 elapsed_time = tf-ti
 print("__getVKCode() performance (seconds):")
-print("total time: "+str(elapsed_time))
-print("time per string: "+str(elapsed_time/total_strings))
+print("\ttotal time: "+str(elapsed_time))
+print("\ttime per string: "+str(elapsed_time/total_strings))
 
 ti = time.time()
 for i in range(0,rounds):
@@ -81,5 +84,58 @@ for i in range(0,rounds):
 tf = time.time()
 elapsed_time = tf-ti
 print("__getVKCodeFast() performance (seconds):")
-print("total time: "+str(elapsed_time))
-print("time per string: "+str(elapsed_time/total_strings))
+print("\ttotal time: "+str(elapsed_time))
+print("\ttime per string: "+str(elapsed_time/total_strings))
+
+""" MOUSE LOOKUP TIME TESTING """
+
+m = Mouse.Mouse()
+rounds = 100
+
+ti = time.time()
+for i in range(0, rounds):
+    m.update(pressRight = True)
+    m.update(pressRight = False)
+tf = time.time()
+time.sleep(2)
+m.update(pressRight = False)
+elapsed_time = tf-ti
+print("right click performance (seconds):")
+print("\ttotal time: "+str(elapsed_time))
+print("\ttime per click: "+str(elapsed_time/(rounds*2)))
+
+ti = time.time()
+for i in range(0, rounds):
+    m.update(pressLeft = True)
+    m.update(pressLeft = False)
+tf = time.time()
+time.sleep(2)
+m.update(pressLeft = False)
+elapsed_time = tf-ti
+print("left click performance (seconds):")
+print("\ttotal time: "+str(elapsed_time))
+print("\ttime per click: "+str(elapsed_time/(rounds*2)))
+
+ti = time.time()
+for i in range(0, rounds):
+    m.update(dyScroll = 480)
+    m.update(dyScroll = -480)
+tf = time.time()
+time.sleep(2)
+elapsed_time = tf-ti
+print("y scroll performance (seconds):")
+print("\ttotal time: "+str(elapsed_time))
+print("\ttime per click: "+str(elapsed_time/(rounds*2)))
+
+ti = time.time()
+for i in range(0, rounds):
+    m.update(x = 100, y = 100)
+    m.update(x = 1200, y = 100)
+    m.update(x = 1200, y = 700)
+    m.update(x = 100, y = 700)
+tf = time.time()
+time.sleep(2)
+elapsed_time = tf-ti
+print("movement performance (seconds):")
+print("\ttotal time: "+str(elapsed_time))
+print("\ttime per click: "+str(elapsed_time/(rounds*4)))
