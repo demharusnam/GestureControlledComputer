@@ -2,48 +2,59 @@ import cv2
 import numpy as np
 import math
 import time
+import imutils
 
-def drawCenterOfMass(img, cnt):
-    """ Determine center of hand """
-    M = cv2.moments(cnt)
-
-    if len(cnt) == 0 and M['m00'] == 0:
-        return
-
-    cX = int(M["m10"] / M["m00"])
-    cY = int(M["m01"] / M["m00"])
-
-    cv2.circle(img, (cX,cY), 8, [255, 0, 0], 3)
-
-def calculateFingers(res, drawing, contours):
+def calculateFingers(result, drawing, thresh):
     """ Calculate fingers visible in frame [TODO: ADD DIRECTION]"""
     #  convexity defect
-    convexHull = cv2.convexHull(res, returnPoints=False)
+    convexHull = cv2.convexHull(result, returnPoints=False)
     visibleFingers = 0
+    diff = 0
+    thumb = False
 
     if len(convexHull) > 3:
         try:
-            defects = cv2.convexityDefects(res, convexHull)
+            defects = cv2.convexityDefects(result, convexHull)
             #drawCenterOfMass(drawing, contours[0])
         except:
-            return 0
+            return (0, False, 0)
 
         if defects is not None:
 
             for i in range(defects.shape[0]):  # calculate the angle
                 s, e, f, d = defects[i][0]
-                start = tuple(res[s][0])
-                end = tuple(res[e][0])
-                far = tuple(res[f][0])
+                start = tuple(result[s][0])
+                end = tuple(result[e][0])
+                far = tuple(result[f][0])
                 a = math.sqrt((end[0] - start[0]) ** 2 + (end[1] - start[1]) ** 2)
                 b = math.sqrt((far[0] - start[0]) ** 2 + (far[1] - start[1]) ** 2)
                 c = math.sqrt((end[0] - far[0]) ** 2 + (end[1] - far[1]) ** 2)
                 theta = math.acos((b ** 2 + c ** 2 - a ** 2) / (2 * b * c))  # cosine law
-                if theta < math.pi / 2:  # angle less than 90 degree are fingers
-                    visibleFingers += 1
-                    cv2.circle(drawing, far, 8, [255, 0, 0], -1)
 
-    return visibleFingers
+                try:
+                    cnts = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+                    cnts = imutils.grab_contours(cnts)
+                    c = max(cnts, key=cv2.contourArea)
+                    top = tuple(c[c[:, :, 1].argmin()][0])
+                    bot = tuple(c[c[:, :, 1].argmax()][0])
+                    boundaryY = int(float(bot[1]) * 0.7) # only mark fingers above this point i.e. reduce false positives
+                    #cv2.circle(drawing, top, 8, (255, 255, 0), -1) # topmost point in hand contour
+                    #cv2.circle(drawing, bot, 8, (255, 255, 0), -1) # bottom-most point in hand contour
+                except:
+                    boundaryY = 0
+
+                if theta < math.pi / 2 and far[1] <= boundaryY:  # angle less than 90 degrees are fingers
+                    if theta > 1.22: # angle greater than 70 degrees is thumb
+                        diff = far[1] - top[1]  # height difference between thumb and index
+                        thumb = True
+
+                    visibleFingers += 1
+
+                    #cv2.circle(drawing, start, 8, [0, 0, 255], -1) # top right
+                    #cv2.circle(drawing, end, 8, [0, 255, 0], -1) # top left
+                    cv2.circle(drawing, far, 8, [255, 0, 0], -1) # angle
+
+    return (visibleFingers, thumb, diff)
 
 def beginGestureRecognition():
     """ Perform Gesture Recognition """
@@ -100,7 +111,7 @@ def beginGestureRecognition():
 
 
         # Contouring and Convex Hull
-        contours, _ = cv2.findContours(skinMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        contours, _ = cv2.findContours(skinMask.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         length = len(contours)
         maxArea = -1
 
@@ -115,18 +126,33 @@ def beginGestureRecognition():
                     result = contours[ci]
 
             hull = cv2.convexHull(result)
+
             drawing = np.zeros(img.shape, np.uint8)
 
             cv2.drawContours(drawing, [result], 0, (0, 255, 0), 2)
             cv2.drawContours(drawing, [hull], 0, (0, 0, 255), 3)
 
-            # Calculating Fingers visible
-            visibleFingers = calculateFingers(result, drawing, contours)
+            # Calculate visible fingers
+            (visibleFingers, thumb, diff) = calculateFingers(result, drawing, skinMask.copy())
 
-            try:
-                gestureText = gestures[visibleFingers]
-            except:
-                gestureText = ""
+            # Determine gesture
+            gestureText = ""
+
+            if len(hull) >= 18:  # a hand
+                if visibleFingers == 1:
+                    if thumb and diff < 80:
+                        gestureText = "Left Click"
+                    elif thumb and diff > 80:
+                        gestureText = "Right Click"
+                    elif not thumb and diff > 80:
+                        gestureText = "Drag"
+                elif visibleFingers == 2 and diff > 80:
+                        gestureText = "Double Click"
+                else:
+                    gestureText = "Move Mouse"
+
+            if gestureText:
+                selectedGesture = gestures[gestureText]
 
             cv2.putText(drawing, gestureText, (int(winWidth * 0.5), winHeight - 15), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
@@ -135,15 +161,20 @@ def beginGestureRecognition():
             drawing = cv2.resize(drawing, (winWidth, winHeight))
             cv2.imshow('Output', drawing)
 
-        if cv2.waitKey(10) == 27:  # press ESC to exit
+        if cv2.waitKey(1) == 27:  # press ESC to exit
             break
 
-
+# Toni use these as gesture codes
 gestures = {
-    0 : "Move Mouse",
-    1 : "Drag",
-    2 : "Double Click",
+    "Move Mouse": 0,
+    "Left Click" : 1,
+    "Double Click" : 2,
+    "Right Click" : 3,
+    "Drag" : 4,
 }
+
+# SELECTED GESTURE CODE
+selectedGesture = -1;
 
 if __name__ == '__main__':
     beginGestureRecognition()
