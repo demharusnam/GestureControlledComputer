@@ -76,10 +76,14 @@ class Keyboard:
         if (chars == 1): #check through all 1 letter key names
             # implement the ASCII code for all numbers and all capital letters https://docs.microsoft.com/en-us/windows/win32/learnwin32/keyboard-input
             # if keyName btwn 0(0x30) to 9(0x39) or A(0x41) to Z(0x5A), use the number of its ASCII code as the key code
-            i = ord(keyName)
-            if ((0x30 <= i <= 0x39) or (0x41 <= i <= 0x5A)):
-                VK_code = i
-            elif(keyName == ';'):
+            try:
+                i = ord(keyName)
+                if ((0x30 <= i <= 0x39) or (0x41 <= i <= 0x5A)):
+                    VK_code = i
+            except:
+                return
+
+            if(keyName == ';'):
                 VK_code = VK_OEM_1
             elif(keyName == '+'):
                 VK_code = VK_OEM_PLUS
@@ -104,20 +108,26 @@ class Keyboard:
         elif(chars == 2): #check through all 2 letter/char key names
             #do keys F1 to F12 and the Fn key?
             if(keyName[0] == 'F'): #F1 to F9
-                n = int(keyName[1])
-                if(1 <= n <= 9):
-                    VK_code = 0x69+n
+                try:
+                    n = int(keyName[1])
+                    if(1 <= n <= 9):
+                        VK_code = 0x69+n
+                except:
+                    pass
             elif(keyName == "UP" and keyParts[0] == "PAGE"):
                 VK_code = VK_PRIOR  # PAGE UP
         elif(chars == 3): #check through all 3 letter/char key names
             #comparing just 1st or 2nd chars may trigger a false match when ignoring the 3rd char
             if (keyName[0] == 'F'):  # F10 to F24
-                n = int(keyName[1:3]) #assume 2nd and 3rd chars of string form number
-                if (10 <= n <= 24):
-                    VK_code = 0x69 + n
+                try:
+                    n = int(keyName[1:3]) #assume 2nd and 3rd chars of string form number
+                    if (10 <= n <= 24):
+                        VK_code = 0x69 + n
+                except:
+                    pass
             elif(keyName == "ADD"):
                 VK_code = VK_ADD #ADD
-            elif(keyName[1] == "ALT"):
+            elif(keyName == "ALT"):
                 if(len(keyParts) == 1): #check if no modifier part to key name to use default ALT key
                     VK_code = VK_MENU #ALT
                 else:
@@ -171,8 +181,6 @@ class Keyboard:
                 VK_code = VK_RETURN  #ENTER
             elif (keyName == "PRINT"):
                 VK_code = VK_PRINT #PRINT
-            elif (keyName == "SCROLL"):
-                VK_code = VK_SCROLL #SCROLL
             elif (keyName == "SHIFT"):
                 if(len(keyParts) == 1): #check if no modifier words, use default SHIFT key
                     VK_code = VK_SHIFT #SHIFT
@@ -193,14 +201,19 @@ class Keyboard:
                 VK_code = VK_DELETE #DELETE
             elif(keyName == "DIVIDE"):
                 VK_code = VK_DIVIDE #DIVIDE
+            elif (keyName == "SCROLL"):
+                VK_code = VK_SCROLL #SCROLL
             elif(keyName == "SELECT"):
                 VK_code = VK_SELECT #SELECT
         elif(chars == 7): #check through all 7 letter/char key names
             if(keyName == "DECIMAL"):
                 VK_code = VK_DECIMAL #DECIMAL
             elif(keyName[0:6] == "NUMPAD"):
-                num = int(keyName[6]) #extract number part from NUMPAD name
-                VK_code = 0x60 + num
+                try:
+                    num = int(keyName[6]) #extract number part from NUMPAD name
+                    VK_code = 0x60 + num
+                except:
+                    pass
             elif(keyName == "WINDOWS"):
                 keyName = keyParts[0]
                 if(keyName == "LEFT"):
@@ -217,9 +230,201 @@ class Keyboard:
                 VK_code = VK_BACK #BACKSPACE
             elif(keyName == "SEPARATOR"):
                 VK_code = VK_SEPARATOR #SEPARATOR
-        elif(chars == 9):
+        elif(chars == 11):
             if(keyName == "PRINTSCREEN"):
                 VK_code = VK_SNAPSHOT #PRINTSCREEN
+
+        return VK_code
+
+    keyNames_len1 = {
+        ';' : VK_OEM_1,
+        '+' : VK_OEM_PLUS,
+        ',' : VK_OEM_COMMA,
+        '-' : VK_OEM_MINUS,
+        '.' : VK_OEM_PERIOD,
+        '/' : VK_OEM_2,
+        '`' : VK_OEM_3,  # same key that makes a '~' char when shift is pressed too
+        '[' : VK_OEM_4,
+        '\\' : VK_OEM_5, # first slash indicates that next slash is a char, not a special character
+        ']' : VK_OEM_6,
+        "'" :VK_OEM_7  # single quote/double quote key
+    }
+
+    keyNames_len2 = {
+        "UP" : {"PAGE" : VK_PRIOR}  # PAGE UP
+    }
+
+    keyNames_len3 = {
+        "ADD" : VK_ADD, # ADD
+        "ALT" : {
+                    "default" : VK_MENU,  # ALT
+                    "LEFT" : VK_LMENU,  # LEFT ALT
+                    "RIGHT" : VK_RMENU,  # RIGHT ALT
+                },
+        "ESC" : VK_ESCAPE,  # ESC
+        "TAB" : VK_TAB  # TAB
+    }
+
+    keyNames_len4 = {
+        "APPS" : VK_APPS,  # APPS
+        "CTRL" : {
+                    "default" : VK_CONTROL,  # CTRL
+                    "LEFT" : VK_LCONTROL,  # LEFT CTRL
+                    "RIGHT" : VK_RCONTROL  # RIGHT CTRL
+                 },
+        "DOWN" : {"PAGE" : VK_NEXT},  # PAGE DOWN
+        "HELP" : VK_HELP,  # HELP
+        "HOME" : VK_HOME,  # HOME
+        "LOCK" : {
+                    "CAPS" : VK_CAPITAL,  # CAPS LOCK
+                    "NUM" : VK_NUMLOCK  # NUM LOCK
+                 }
+    }
+
+    keyNames_len5 = {
+        "ARROW" : {
+                    "DOWN" : VK_DOWN,  # DOWN ARROW
+                    "LEFT" : VK_LEFT,  # LEFT ARROW
+                    "RIGHT": VK_RIGHT,  # RIGHT ARROW
+                    "UP" : VK_UP  # UP ARROW
+                  },
+        "CLEAR" : VK_CLEAR,  # CLEAR
+        "ENTER" : VK_RETURN,  # ENTER
+        "PRINT" : VK_PRINT,  # PRINT
+        "SHIFT" : {
+                    "default" : VK_SHIFT,  # SHIFT
+                    "LEFT" : VK_LSHIFT,  # LEFT SHIFT
+                    "RIGHT" : VK_RSHIFT  # RIGHT SHIFT
+                  },
+        "SLEEP" : VK_SLEEP,  # SLEEP
+        "SPACE" : VK_SPACE  # SPACE
+    }
+
+    keyNames_len6 = {
+        "INSERT" : VK_INSERT,  # INSERT
+        "DELETE" : VK_DELETE,  # DELETE
+        "DIVIDE" : VK_DIVIDE,  # DIVIDE
+        "SCROLL": VK_SCROLL,  # SCROLL
+        "SELECT" : VK_SELECT  # SELECT
+    }
+
+    keyNames_len7 = {
+        "DECIMAL" : VK_DECIMAL, #DECIMAL
+        "WINDOWS" : {
+                        "LEFT" : VK_LWIN, #LEFT WINDOWS
+                        "RIGHT" : VK_RWIN #RIGHT WINDOWS
+                    }
+    }
+
+    keyNames_len8 = {
+        "MULTIPLY" : VK_MULTIPLY, #MULTIPLY
+        "SUBTRACT" : VK_SUBTRACT #SUBTRACT
+    }
+
+    keyNames_len9 = {
+        "BACKSPACE" : VK_BACK,  # BACKSPACE
+        "SEPARATOR" : VK_SEPARATOR  # SEPARATOR
+    }
+
+    keyNames_len11 = {
+        "PRINTSCREEN" : VK_SNAPSHOT  # PRINTSCREEN
+    }
+
+    keyNames_byLength = [
+        None, #put nothing in 0 index, sine no key names can have a length of 0
+        keyNames_len1,
+        keyNames_len2,
+        keyNames_len3,
+        keyNames_len4,
+        keyNames_len5,
+        keyNames_len6,
+        keyNames_len7,
+        keyNames_len8,
+        keyNames_len9,
+        None,
+        keyNames_len11
+    ]
+
+    def __getVKCodeFast(self,keyString):
+        ###print("keyString is "+keyString)
+        VK_code = 0x00  # this keycode it a placeholder, it is not used in Windows for any known virtual keys
+
+        #extract the main key name from the last part of keyname from string
+        #any modifier words (up, down, left, right) should be separated from the main key name by a spae
+        keyParts = [x for x in keyString.split(' ') if(x != '')] #get rid of any blank '' entries
+        keyName = keyParts[-1] #main key name
+        if(len(keyParts) > 1):
+            prefix = keyParts[0]
+        else:
+            prefix = None
+        keyNames_dict = None
+
+        chars = len(keyName)
+        if (chars == 1): #check through all 1 letter key name special cases
+            # implement the ASCII code for all numbers and all capital letters https://docs.microsoft.com/en-us/windows/win32/learnwin32/keyboard-input
+            # if keyName btwn 0(0x30) to 9(0x39) or A(0x41) to Z(0x5A), use the number of its ASCII code as the key code
+            try:
+                i = ord(keyName)
+                if ((0x30 <= i <= 0x39) or (0x41 <= i <= 0x5A)):
+                    VK_code = i
+                    return VK_code
+            except:
+                ###print(keyName+" is not alphanumeric")
+                pass
+
+        elif(chars == 2 or chars == 3): #check through all 2 letter/char key name special cases
+            # comparing just 1st or 2nd chars may trigger a false match when ignoring the 3rd char
+            if(keyName[0] == 'F'): #F1 to F24
+                try:
+                    n = int(keyName[1:])
+                    if(1 <= n <= 24):
+                        VK_code = 0x69+n
+                except:
+                    ###print(keyName+" is not an F key between 1 and 24")
+                    pass
+                return VK_code
+
+        elif(chars == 7): #check through all 7 letter/char key name special cases
+            if (keyName[0:6] == "NUMPAD"):
+                try:
+                    num = int(keyName[6])  # extract number part from NUMPAD name
+                    if(0<= num <= 9):
+                        VK_code = 0x60 + num
+                except:
+                    ###print(keyName+" is not a NUMPAD key between 0 and 9")
+                    pass
+                return VK_code
+
+        #check if no special cases for key code occured, retrieve dict based on # of chars in keyName
+        if((1 <= chars <= 9) or (chars == 11)):
+            keyNames_dict = self.keyNames_byLength[chars]
+            # print("Retrieved dict with " + str(chars) + " letter words")
+
+            # search keyName dict if any dict was selected based on # of chars in keyName
+            try:
+                VK_code = keyNames_dict[keyName]
+                ###print("Found entry in dict for keyName " + keyName)
+            except:
+                ###print("No entry in dict for keyName " + keyName)
+                return VK_code
+
+            if (type(VK_code) is dict):  # checks if dict entry is another dict
+                ###print("Entry in dict was another dict")
+
+                if (prefix == None):  # if dict entry is another dict, but no second part of key name, use default value
+                    try:
+                        VK_code = VK_code["default"]
+                    except:
+                        VK_code = 0x00
+                        ###print("No default value for " + keyName + " found, needs a prefix")
+                else:  # otherwise search other dict with preceding part of key name
+                    try:
+                        VK_code = VK_code[prefix]
+                    except:
+                        VK_code = 0x00
+                        ###print("No key in dict for prefix " + prefix)
+        else:
+            print("Special case found for keyName "+keyName)
 
         return VK_code
 
