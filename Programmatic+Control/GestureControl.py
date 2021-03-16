@@ -117,18 +117,46 @@ def beginGestureRecognition():
 
         lower = np.array([0, 48, 80], dtype="uint8")
         upper = np.array([20, 255, 255], dtype="uint8")
-        skinMask = cv2.inRange(hsv, lower, upper)
+        skinMask = cv2.inRange(hsv.copy(), lower, upper)
         cv2.namedWindow('Threshold', cv2.WINDOW_NORMAL)
         cv2.moveWindow('Threshold', winWidth * 2 + 15, 0)
-        skinMask = cv2.resize(skinMask, (winWidth, winHeight))
+        #skinMask = cv2.resize(skinMask, (winWidth, winHeight))
 
         skinMask = cv2.blur(skinMask, (10, 10))
+        #skinMask = cv2.erode(skinMask, (10, 10))
         #skinMask = cv2.bilateralFilter(skinMask,5,75,75)
         #skinMask = cv2.medianBlur(skinMask, 5)
 
         cv2.imshow('Threshold', skinMask)
 
+        """
+        edges = cv2.Canny(hsv.copy(), 130,150)
+        edges = cv2.dilate(edges, (10,10), iterations = 3)
+        #edges = cv2.blur(edges, (5,5))
+        #edges = cv2.resize(edges, (winWidth, winHeight))
+        cv2.namedWindow('edges', cv2.WINDOW_NORMAL)
+        cv2.moveWindow('edges', 0, winHeight)
+        cv2.imshow('edges', edges)
 
+        skinMask2 = skinMask.copy()
+        skinMask2[np.where(edges != [0])] = [0]
+        skinMask2 = cv2.erode(skinMask2, (10,10), iterations = 3)
+        cv2.namedWindow('thresh w div', cv2.WINDOW_NORMAL)
+        cv2.moveWindow('thresh w div', 2*winWidth, winHeight)
+        cv2.imshow('thresh w div', skinMask2)
+        
+        skinMaskCircles = skinMask2.copy()
+        circles = cv2.HoughCircles(skinMaskCircles, cv2.HOUGH_GRADIENT, 1.2, 5)
+        if(circles is not None):
+            circles = np.round(circles[0,:]).astype("int")
+
+            for (x,y,r) in circles:
+                cv2.circle(skinMaskCircles, (x,y), r, (255, 0, 255), 4)
+
+        cv2.namedWindow('circles', cv2.WINDOW_NORMAL)
+        cv2.moveWindow('circles', 2 * winWidth, winHeight)
+        cv2.imshow('circles', skinMaskCircles)
+        """
         # Contouring and Convex Hull
         contours, _ = cv2.findContours(skinMask.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         length = len(contours)
@@ -176,8 +204,8 @@ def beginGestureRecognition():
 
             cv2.putText(drawing, gestureText, (int(winWidth * 0.5), winHeight - 15), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
-            #cv2.namedWindow('Output', cv2.WINDOW_NORMAL)
-            #cv2.moveWindow('Output', winWidth * 3 + 15, 0)
+            cv2.namedWindow('Output', cv2.WINDOW_NORMAL)
+            cv2.moveWindow('Output', winWidth, winHeight)
             drawing = cv2.resize(drawing, (winWidth, winHeight))
             cv2.imshow('Output', drawing)
 
