@@ -20,42 +20,67 @@ def calculateFingers(result, drawing, thresh):
             return (0, False, 0)
 
         if defects is not None:
-
+            area = cv2.contourArea(result)
             for i in range(defects.shape[0]):  # calculate the angle
                 s, e, f, d = defects[i][0]
-                if(d > 20):
-                    start = tuple(result[s][0])
-                    end = tuple(result[e][0])
-                    far = tuple(result[f][0])
-                    a = math.sqrt((end[0] - start[0]) ** 2 + (end[1] - start[1]) ** 2)
-                    b = math.sqrt((far[0] - start[0]) ** 2 + (far[1] - start[1]) ** 2)
-                    c = math.sqrt((end[0] - far[0]) ** 2 + (end[1] - far[1]) ** 2)
-                    theta = math.acos((b ** 2 + c ** 2 - a ** 2) / (2 * b * c))  # cosine law
 
-                    try:
-                        cnts = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-                        cnts = imutils.grab_contours(cnts)
-                        c = max(cnts, key=cv2.contourArea)
-                        top = tuple(c[c[:, :, 1].argmin()][0])
-                        bot = tuple(c[c[:, :, 1].argmax()][0])
-                        boundaryY = int(float(bot[1]) * 0.7) # only mark fingers above this point i.e. reduce false positives
-                        #cv2.circle(drawing, top, 8, (255, 255, 0), -1) # topmost point in hand contour
-                        #cv2.circle(drawing, bot, 8, (255, 255, 0), -1) # bottom-most point in hand contour
-                    except:
-                        boundaryY = 0
+                start = tuple(result[s][0])
+                end = tuple(result[e][0])
+                far = tuple(result[f][0])
 
-                    if theta < math.pi / 1.5 and far[1] <= boundaryY:  # angle less than 90 degrees are fingers
-                        if theta > 1.22: # angle greater than 70 degrees is thumb
-                            diff = far[1] - top[1]  # height difference between thumb and index
-                            thumb = True
+                # calculate distance of the concave dip in the convex shell
+                # Note: Square roots are SLOW!
+                #       This section of code tries to use the squared version of distance where possible
+                w = start[0]-end[0]
+                h = start[1]-end[1]
+                L1 = math.sqrt(w*w + h*h) # Length 1
+                w = start[0]-far[0]
+                h = start[1]-far[1]
+                L2_sq = w*w + h*h #Length 2 squared
+                w = far[0]-end[0]
+                h = far[1]-end[1]
+                L3_sq = w*w + h*h #Length 3 squared
+                delta = (L1/2)+(L2_sq-L3_sq)/(2*L1)
+                concave_dip_sq = L2_sq - delta*delta
+                print(concave_dip_sq)
 
-                        visibleFingers += 1
+                """
+                cv2.circle(drawing, far, 8, [255, 0, 0], -1)  # angle
+                cv2.circle(drawing, end, 8, [255, 255, 0], -1)  # angle
+                cv2.circle(drawing, start, 8, [0, 255, 255], -1)  # angle
+                """
+                a = math.sqrt((end[0] - start[0]) ** 2 + (end[1] - start[1]) ** 2)
+                b = math.sqrt((far[0] - start[0]) ** 2 + (far[1] - start[1]) ** 2)
+                c = math.sqrt((end[0] - far[0]) ** 2 + (end[1] - far[1]) ** 2)
+                theta = math.acos((b ** 2 + c ** 2 - a ** 2) / (2 * b * c))  # cosine law
 
-                        #cv2.circle(drawing, start, 8, [0, 0, 255], -1) # top right
-                        #cv2.circle(drawing, end, 8, [0, 255, 0], -1) # top left
-                        cv2.circle(drawing, far, 8, [255, 0, 0], -1) # angle
-                        cv2.circle(drawing, end, 8, [255, 255, 0], -1)  # angle
-                        cv2.circle(drawing, start, 8, [0, 255, 255], -1)  # angle
+                try:
+                    cnts = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+                    cnts = imutils.grab_contours(cnts)
+                    c = max(cnts, key=cv2.contourArea)
+                    top = tuple(c[c[:, :, 1].argmin()][0])
+                    bot = tuple(c[c[:, :, 1].argmax()][0])
+                    boundaryY = int(float(bot[1]) * 0.7) # only mark fingers above this point i.e. reduce false positives
+                    #cv2.circle(drawing, top, 8, (255, 255, 0), -1) # topmost point in hand contour
+                    #cv2.circle(drawing, bot, 8, (255, 255, 0), -1) # bottom-most point in hand contour
+                except:
+                    boundaryY = 0
+
+                #if theta < math.pi / 2 and far[1] <= boundaryY:  # angle less than 90 degrees are fingers
+                if theta < math.pi / 1.7 and concave_dip_sq > area/12:  # angle less than 90 degrees are fingers
+                    print("distance to convex defect: "+str(concave_dip_sq)+", area = "+str(math.sqrt(area)))
+                    if theta > 1.22: # angle greater than 70 degrees is thumb
+                        #diff = far[1] - top[1]  # height difference between thumb and index
+                        diff = math.sqrt(math.pow(far[0] - start[0],2) + math.pow(far[1] - start[1],2))  # height difference between thumb and index
+                        thumb = True
+
+                    visibleFingers += 1
+
+                    #cv2.circle(drawing, start, 8, [0, 0, 255], -1) # top right
+                    #cv2.circle(drawing, end, 8, [0, 255, 0], -1) # top left
+                    cv2.circle(drawing, far, 8, [255, 0, 0], -1) # angle
+                    cv2.circle(drawing, end, 8, [255, 255, 0], -1)  # angle
+                    cv2.circle(drawing, start, 8, [0, 255, 255], -1)  # angle
 
     return (visibleFingers, thumb, diff)
 
