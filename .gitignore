@@ -6,4 +6,6 @@
 .venv
 ENV/
 
+#pycache
+/Programmatic+Control/__pycache__/
 .DS_Store
