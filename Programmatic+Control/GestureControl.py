@@ -83,7 +83,8 @@ def calculateFingers(result, drawing, thresh):
 
                 #if theta < math.pi / 2 and far[1] <= boundaryY:  # angle less than 90 degrees are fingers
 
-                if(start[1] <= cY and end[1] <= cY):
+                #screen cordinates go down from the top left corner, which is why all the height logic looks backwards
+                if(start[1] <= cY+20 and end[1] <= cY+20):
 
                     if theta < math.pi / 1.5 and concave_dip_sq > area/16:  # angle less than 90 degrees are fingers
                         #print("distance to convex defect: "+str(concave_dip_sq)+", area = "+str(math.sqrt(area)))
@@ -91,10 +92,14 @@ def calculateFingers(result, drawing, thresh):
                         #defect_far.append(far)
                         #defect_angles.append(theta)
 
-                        if theta <= math.pi/3:  # angle less than 60 degrees is small
-                            smallAngles+=1
-                            cv2.circle(drawing, far, 8, [255, 0, 255], -1)  # angle
+                        if theta >= math.pi/3: # angle less than 60 degrees is small
+                            if (far[1] >= cY-math.sqrt(area)/10): # convexity defect far point that is close-ish to center of mass height is probably from thumb
+                                thumb = True
+                                cv2.circle(drawing, far, 8, [255, 0, 255], -1)  # angle
+                            else:
+                                cv2.circle(drawing, far, 8, [255, 0, 0], -1)  # angle
                         else:
+                            smallAngles += 1
                             cv2.circle(drawing, far, 8, [255, 0, 0], -1)  # angle
 
 
@@ -190,7 +195,6 @@ def beginGestureRecognition():
         # Skin detection and thresholding
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
-
         #hsv = cv2.bilateralFilter(hsv,5,75,75)
         hsv = cv2.blur(hsv, (5, 5))
         hsv = cv2.medianBlur(hsv, 5)
@@ -264,6 +268,8 @@ def beginGestureRecognition():
             # Calculate visible fingers
             (visibleFingers, thumb, diff, smallAngles, mouseX, mouseY) = calculateFingers(result, drawing, skinMask.copy())
             #print("visible fingers = " + str(visibleFingers) + " smallAngles = " + str(smallAngles) + " diff = " + str(diff))
+            print("angles = " + str(visibleFingers) + " smallAngles = " + str(smallAngles)+" thumb = "+str(thumb))
+
             # Determine gesture
             gestureText = ""
 
@@ -287,18 +293,24 @@ def beginGestureRecognition():
                     gestureText = "Move Mouse"
                     m.update(x = mouseX, y = mouseY)
                 elif angles == 1:
-                    if smallAngles == 0:
+                    if thumb:
                         gestureText = "Left Click"
                     else:
-                        gestureText = "Drag"
+                        if smallAngles != 0:
+                            gestureText = "Drag"
                 elif angles == 2:
-                    if smallAngles == 0:
-                        gestureText = "Right Click"
+                    if thumb:
+                        if smallAngles == 0:
+                            gestureText = "Right Click"
+                        else:
+                            gestureText = "Double Click"
                     else:
                         gestureText = "Drag"
                 elif angles == 3:
+                    if thumb:
                         gestureText = "Double Click"
-                else:
+
+                if gestureText == "":
                     gestureText = "None"
 
             #if gestureText:
