@@ -42,8 +42,9 @@ def calculateFingers(result, drawing, thresh):
                 far = tuple(result[f][0])
 
                 # calculate distance of the concave dip in the convex shell
+                # calculates the shortest distance from the far point to the line connecting the start and end points
                 # Note: Square roots are SLOW!
-                #       This section of code tries to use the squared version of distance where possible
+                # This section of code tries to use the squared version of distance where possible
                 w = start[0]-end[0]
                 h = start[1]-end[1]
                 L1 = math.sqrt(w*w + h*h) # Length 1
@@ -83,17 +84,23 @@ def calculateFingers(result, drawing, thresh):
 
                 #if theta < math.pi / 2 and far[1] <= boundaryY:  # angle less than 90 degrees are fingers
 
-                #screen cordinates go down from the top left corner, which is why all the height logic looks backwards
+                # ignore any concave triangles whose start OR end points are below the center of mass (or somewhere close to it)
+                # screen cordinates go down from the top left corner, which is why all the height logic looks backwards
                 if(start[1] <= cY+20 and end[1] <= cY+20):
 
+                    # ignore any concave triangles with angles over 120 degrees, or whose triangle depth (aka the dip) is not "big enough" relative to the size of the hand
+                    # changes in concave triangle depth are relative to area of hand to account for distance of hand from camera
                     if theta < math.pi / 1.5 and concave_dip_sq > area/16:  # angle less than 90 degrees are fingers
                         #print("distance to convex defect: "+str(concave_dip_sq)+", area = "+str(math.sqrt(area)))
-
                         #defect_far.append(far)
                         #defect_angles.append(theta)
 
                         if theta >= math.pi/3: # angle less than 60 degrees is small
-                            if (far[1] >= cY-math.sqrt(area)/10): # convexity defect far point that is close-ish to center of mass height is probably from thumb
+
+                            # convexity defect far point that is close-ish to center of mass height is probably connected thumb
+                            # cY-sqrt(area) to account for changes in center of mass due to arm?
+                            # was testing code with sweater until this point
+                            if (far[1] >= cY-math.sqrt(area)/10):
                                 thumb = True
                                 cv2.circle(drawing, far, 8, [255, 0, 255], -1)  # angle
                             else:
