@@ -4,6 +4,9 @@ import math
 import time
 import imutils
 
+import Mouse
+m = Mouse.Mouse()
+
 def calculateFingers(result, drawing, thresh):
     """ Calculate fingers visible in frame [TODO: ADD DIRECTION]"""
     #  convexity defect
@@ -11,6 +14,7 @@ def calculateFingers(result, drawing, thresh):
     visibleFingers = 0
     diff = 0
     thumb = False
+    smallAngles = 0
 
     if len(convexHull) > 3:
         try:
@@ -22,6 +26,7 @@ def calculateFingers(result, drawing, thresh):
         if defects is not None:
             area = cv2.contourArea(result)
 
+            #center point of hand
             M = cv2.moments(result)
             cX = int(M["m10"] / M["m00"])
             cY = int(M["m01"] / M["m00"])
@@ -77,27 +82,40 @@ def calculateFingers(result, drawing, thresh):
                 """
 
                 #if theta < math.pi / 2 and far[1] <= boundaryY:  # angle less than 90 degrees are fingers
-                if theta < math.pi / 1.5 and concave_dip_sq > area/16:  # angle less than 90 degrees are fingers
-                    #print("distance to convex defect: "+str(concave_dip_sq)+", area = "+str(math.sqrt(area)))
 
-                    #defect_far.append(far)
-                    #defect_angles.append(theta)
+                if(start[1] <= cY and end[1] <= cY):
 
-                    if theta > 1.22:  # angle greater than 70 degrees is thumb
-                        # diff = far[1] - top[1]  # height difference between thumb and index
-                        w = start[0] - end[0]
-                        h = start[1] - end[1]
-                        diff = math.sqrt(w * w + h * h)  # distance between thumb joint and index joint
-                        if (diff > 10):
-                            thumb = True
+                    if theta < math.pi / 1.5 and concave_dip_sq > area/16:  # angle less than 90 degrees are fingers
+                        #print("distance to convex defect: "+str(concave_dip_sq)+", area = "+str(math.sqrt(area)))
 
-                    visibleFingers += 1
+                        #defect_far.append(far)
+                        #defect_angles.append(theta)
 
-                    #cv2.circle(drawing, start, 8, [0, 0, 255], -1) # top right
-                    #cv2.circle(drawing, end, 8, [0, 255, 0], -1) # top left
-                    cv2.circle(drawing, far, 8, [255, 0, 0], -1) # angle
-                    cv2.circle(drawing, end, 8, [255, 255, 0], -1)  # angle
-                    cv2.circle(drawing, start, 8, [0, 255, 255], -1)  # angle
+                        if theta <= math.pi/3:  # angle less than 60 degrees is small
+                            smallAngles+=1
+                            cv2.circle(drawing, far, 8, [255, 0, 255], -1)  # angle
+                        else:
+                            cv2.circle(drawing, far, 8, [255, 0, 0], -1)  # angle
+
+
+                        """
+                        if theta > 1.22:  # angle greater than 70 degrees is thumb
+                            # diff = far[1] - top[1]  # height difference between thumb and index
+    
+                            #w = start[0] - end[0]
+                            #h = start[1] - end[1]
+                            #diff = math.sqrt(w * w + h * h)  # distance between thumb joint and index joint
+                            #if (diff > 10):
+                            #    thumb = True
+                        """
+
+                        visibleFingers += 1
+
+                        #cv2.circle(drawing, start, 8, [0, 0, 255], -1) # top right
+                        #cv2.circle(drawing, end, 8, [0, 255, 0], -1) # top left
+                        #cv2.circle(drawing, far, 8, [255, 0, 0], -1) # angle
+                        cv2.circle(drawing, end, 8, [255, 255, 0], -1)  # angle
+                        cv2.circle(drawing, start, 8, [0, 255, 255], -1)  # angle
             """
             # assumes left hand
             for i in range(0, visibleFingers):
@@ -120,7 +138,7 @@ def calculateFingers(result, drawing, thresh):
                             break
             """
 
-    return (visibleFingers, thumb, diff)
+    return (visibleFingers, thumb, diff, smallAngles, cX, cY)
 
 
 #face = cv2.imread("face.png",cv2.IMREAD_GRAYSCALE)
@@ -244,8 +262,8 @@ def beginGestureRecognition():
             cv2.drawContours(drawing, [hull], 0, (0, 0, 255), 3)
 
             # Calculate visible fingers
-            (visibleFingers, thumb, diff) = calculateFingers(result, drawing, skinMask.copy())
-            print("visible fingers = " + str(visibleFingers) + " thumb = " + str(thumb) + " diff = " + str(diff))
+            (visibleFingers, thumb, diff, smallAngles, mouseX, mouseY) = calculateFingers(result, drawing, skinMask.copy())
+            #print("visible fingers = " + str(visibleFingers) + " smallAngles = " + str(smallAngles) + " diff = " + str(diff))
             # Determine gesture
             gestureText = ""
 
@@ -265,19 +283,26 @@ def beginGestureRecognition():
             """
             angles = visibleFingers
             if len(hull) >= 18:  # a hand
-                if angles == 1 and thumb:
-                    gestureText = "Left Click"
+                if angles == 0:
+                    gestureText = "Move Mouse"
+                    m.update(x = mouseX, y = mouseY)
+                elif angles == 1:
+                    if smallAngles == 0:
+                        gestureText = "Left Click"
+                    else:
+                        gestureText = "Drag"
                 elif angles == 2:
-                    if thumb:
+                    if smallAngles == 0:
                         gestureText = "Right Click"
                     else:
                         gestureText = "Drag"
                 elif angles == 3:
                         gestureText = "Double Click"
                 else:
-                    gestureText = "Move Mouse"
-            if gestureText:
-                selectedGesture = gestures[gestureText]
+                    gestureText = "None"
+
+            #if gestureText:
+                #selectedGesture = gestures[gestureText]
 
             cv2.putText(drawing, gestureText, (int(winWidth * 0.5), winHeight - 15), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
