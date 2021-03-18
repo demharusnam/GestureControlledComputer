@@ -4,8 +4,8 @@ import math
 import time
 import imutils
 
-import Mouse
-m = Mouse.Mouse()
+from Programmatic_Control import GestureID_to_PControl
+fsm = GestureID_to_PControl.FSM()
 
 def calculateFingers(result, drawing, thresh):
     """ Calculate fingers visible in frame [TODO: ADD DIRECTION]"""
@@ -273,7 +273,7 @@ def beginGestureRecognition():
             cv2.drawContours(drawing, [hull], 0, (0, 0, 255), 3)
 
             # Calculate visible fingers
-            (visibleFingers, thumb, diff, smallAngles, mouseX, mouseY) = calculateFingers(result, drawing, skinMask.copy())
+            (visibleFingers, thumb, diff, smallAngles, centerX, centerY) = calculateFingers(result, drawing, skinMask.copy())
             #print("visible fingers = " + str(visibleFingers) + " smallAngles = " + str(smallAngles) + " diff = " + str(diff))
             print("angles = " + str(visibleFingers) + " smallAngles = " + str(smallAngles)+" thumb = "+str(thumb))
 
@@ -295,10 +295,11 @@ def beginGestureRecognition():
                     gestureText = "Move Mouse"
             """
             angles = visibleFingers
+            selectedGesture = -1
             if len(hull) >= 18:  # a hand
                 if angles == 0:
                     gestureText = "Move Mouse"
-                    m.update(x = mouseX, y = mouseY)
+                    #m.update(x = mouseX, y = mouseY)
                 elif angles == 1:
                     if thumb:
                         gestureText = "Left Click"
@@ -319,9 +320,8 @@ def beginGestureRecognition():
 
                 if gestureText == "":
                     gestureText = "None"
-
-            #if gestureText:
-                #selectedGesture = gestures[gestureText]
+                else:
+                    selectedGesture = gestures[gestureText]
 
             cv2.putText(drawing, gestureText, (int(winWidth * 0.5), winHeight - 15), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
@@ -332,6 +332,9 @@ def beginGestureRecognition():
 
         if cv2.waitKey(1) == 27:  # press ESC to exit
             break
+
+        #programmatic control section
+        fsm.controlComputer(selectedGesture, centerX, y = centerY)
 
 # Toni use these as gesture codes
 gestures = {

@@ -1,9 +1,8 @@
 import time
-import Keyboard
-import Mouse
-from GestureControl import gestures
 
-idToGesture = dict((id, gestureText) for (gestureText, id) in gestures.items())
+#from Gesture_Control.GestureControl import gestures      # <- Mansur's Gesture Recognition Code
+#from Programmatic_Control.GestureControl import gestures # <- Toni's Gesture Recognition Code
+#idToGesture = dict((id, gestureText) for (gestureText, id) in gestures.items())
 
 """
 gestures = {
@@ -17,11 +16,20 @@ gestures = {
 }"""
 
 class FSM:
-    def __init__(self, mouse, keyboard):
-        self.m = mouse
-        self.kb = keyboard
-        self.isDrag = False
+    def __init__(self, mouse = None, keyboard = None):
+        if(mouse == None):
+            from Programmatic_Control import Mouse
+            self.m = Mouse.Mouse()
+        else:
+            self.m = mouse
 
+        if(keyboard == None):
+            from Programmatic_Control import Keyboard
+            self.kb = Keyboard.Keyboard()
+        else:
+            self.kb = keyboard
+
+        self.isDrag = False
         self.inputs = [-1,-1,-1,-1,-1]
         self.i = 0
 
@@ -100,9 +108,12 @@ class FSM:
                     print("Gesture ID "+str(gestureID)+" not recognized")
 
 if __name__ == "__main__":
-    print("Hi")
+    import Mouse
+    import Keyboard
+
     m = Mouse.Mouse()
     kb = Keyboard.Keyboard()
+
     fsm = FSM(m,kb)
     fsm.controlComputer(5) #show keyboard
     time.sleep(1)
