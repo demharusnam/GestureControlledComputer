@@ -34,6 +34,7 @@ class FSM:
         self.i = 0
 
     def controlComputer(self, gestureID, x = None, y = None,):
+        print("isDrag = " + str(self.isDrag))
         print("gestureID = "+str(gestureID)+", gesture = ", end = "")
         """
         #only let gesture ID through if previous 5 ids match
@@ -51,19 +52,18 @@ class FSM:
 
         # account for drag having 2 states, the press and release of left click
         if(gestureID == 4): # press left click for drag
-            if(self.isDrag):
-                self.m.update(x=x, y=y)
-                print("drag")
-            else:
+            if(not self.isDrag):
                 self.isDrag = True
-                self.m.update(pressLeft = True, x=x, y=y)
+                self.m.update(pressLeft=True, x=x, y=y)
                 print("drag start")
 
-            return
+            else:
+                self.m.update(x=x, y=y)
+                print("drag")
 
         else:
             if(self.isDrag): # release left click from drag
-                isDrag = False
+                self.isDrag = False
                 self.m.update(pressLeft = False)
                 print("drag end")
 
@@ -135,4 +135,5 @@ if __name__ == "__main__":
     time.sleep(1)
     fsm.controlComputer(0, 100, 100) #end drag at second coordinatess
     time.sleep(1)
+    #gets stuck in drag state?
     fsm.controlComputer(0, 200, 200) #move mouse to third coordinates away from drag area
