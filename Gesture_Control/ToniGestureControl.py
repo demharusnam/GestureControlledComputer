@@ -96,7 +96,7 @@ def calculateFingers(result, drawing, thresh):
 
                     # ignore any concave triangles with angles over 120 degrees, or whose triangle depth (aka the dip) is not "big enough" relative to the size of the hand
                     # changes in concave triangle depth are relative to area of hand to account for distance of hand from camera
-                    if theta < math.pi / 1.5 and concave_dip_sq > area/16:  # angle less than 90 degrees are fingers
+                    if theta < math.pi / 1.5 and area/4 > concave_dip_sq > area/16:  # angle less than 90 degrees are fingers
                         #print("distance to convex defect: "+str(concave_dip_sq)+", area = "+str(math.sqrt(area)))
                         #defect_far.append(far)
                         #defect_angles.append(theta)
