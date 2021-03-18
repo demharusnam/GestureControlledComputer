@@ -157,7 +157,7 @@ def beginGestureRecognition():
             cv2.putText(drawing, gestureText, (int(winWidth * 0.5), winHeight - 15), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
             cv2.namedWindow('Output', cv2.WINDOW_NORMAL)
-            cv2.moveWindow('Output', winWidth * 3 + 15, 0)
+            cv2.moveWindow('Output', winWidth * 2 + 15, winHeight) #only changing this line because screen is too small to fit (winWidth * 2 + 15, winHeight)
             drawing = cv2.resize(drawing, (winWidth, winHeight))
             cv2.imshow('Output', drawing)
 

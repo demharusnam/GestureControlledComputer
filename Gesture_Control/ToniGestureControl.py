@@ -35,7 +35,7 @@ def calculateFingers(result, drawing, thresh):
             cv2.line(drawing, (cX-16, thumbBound), (cX+16, thumbBound), [255, 150, 150], 2)
 
             #line above which all points of concave triangles must lie
-            concaveBound = int(cY+10+math.sqrt(area)/10)
+            concaveBound = cY+20 #int(cY+10+math.sqrt(area)/10)
             cv2.line(drawing, (cX-100, concaveBound), (cX+100, concaveBound), [255, 255, 255], 2)
 
             #defect_far = []
