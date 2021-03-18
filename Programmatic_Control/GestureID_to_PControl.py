@@ -34,7 +34,7 @@ class FSM:
         self.i = 0
 
     def controlComputer(self, gestureID, x = None, y = None,):
-        print("isDrag = " + str(self.isDrag))
+        #print("isDrag = " + str(self.isDrag))
         print("gestureID = "+str(gestureID)+", gesture = ", end = "")
         """
         #only let gesture ID through if previous 5 ids match
