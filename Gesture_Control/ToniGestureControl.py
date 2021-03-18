@@ -100,7 +100,7 @@ def calculateFingers(result, drawing, thresh):
                         #print("distance to convex defect: "+str(concave_dip_sq)+", area = "+str(math.sqrt(area)))
                         #defect_far.append(far)
                         #defect_angles.append(theta)
-                        rad = math.sqrt(area)
+                        #rad = math.sqrt(area)
                         #cv2.circle(drawing, far, int(rad/1.5), [255, 255, 255], 1)  # angle
                         #cv2.circle(drawing, far, int(rad/4), [255, 255, 255], 1)  # angle
 
