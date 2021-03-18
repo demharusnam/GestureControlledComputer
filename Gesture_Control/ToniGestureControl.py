@@ -8,12 +8,13 @@ from Programmatic_Control import GestureID_to_PControl
 
 def calculateFingers(result, drawing, thresh):
     """ Calculate fingers visible in frame [TODO: ADD DIRECTION]"""
-    #  convexity defect
     convexHull = cv2.convexHull(result, returnPoints=False)
+    #  convexity defect
     visibleFingers = 0
     diff = 0
     thumb = False
     smallAngles = 0
+    cX = cY = -1
 
     if len(convexHull) > 3:
         try:
@@ -177,6 +178,13 @@ def beginGestureRecognition():
     winWidth = 426
     winHeight = 240
 
+    screenWidth = 1480 #1280
+    screenHeight = 920 #720
+    offsetX = 50
+    offsetY = 50
+    ratioX = int((screenWidth)/(winWidth-2*offsetX))
+    ratioY = int((screenHeight)/(winHeight-2*offsetY-10))
+
     # OPENCV's DEFAULT FPS CHECKING METHOD ONLY WORKS ON VIDEO FILES - NOT LIVE FEED
     # Checking FPS
     fps = 15
@@ -291,7 +299,7 @@ def beginGestureRecognition():
             #print("visible fingers = " + str(visibleFingers) + " smallAngles = " + str(smallAngles) + " diff = " + str(diff))
 
             print("angles = " + str(visibleFingers) + " smallAngles = " + str(smallAngles)+" thumb = "+str(thumb))
-
+            cv2.rectangle(drawing, (offsetX, offsetY), (winWidth-offsetX, winHeight-offsetY), [255, 255, 255], 1)
             # Determine gesture
             gestureText = ""
 
@@ -355,11 +363,11 @@ def beginGestureRecognition():
 
         elif key == 32: #press SPACEBAR to stop gestures from controlling mouse
             enableControl = False
-
+        print(centerX, centerY)
         print("control = "+str(enableControl))
         if(enableControl):
             #programmatic control section
-            fsm.controlComputer(selectedGesture, centerX*3, y = centerY*3)
+            fsm.controlComputer(selectedGesture, (centerX-offsetX)*ratioX, y = (centerY-offsetY)*ratioY)
 
 # Toni use these as gesture codes
 gestures = {

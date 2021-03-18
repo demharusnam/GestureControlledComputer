@@ -1,8 +1,9 @@
 import time
 
 #from Gesture_Control.GestureControl import gestures      # <- Mansur's Gesture Recognition Code
-#from Programmatic_Control.GestureControl import gestures # <- Toni's Gesture Recognition Code
-#idToGesture = dict((id, gestureText) for (gestureText, id) in gestures.items())
+from Gesture_Control.ToniGestureControl import gestures # <- Toni's Gesture Recognition Code
+idToGesture = dict((id, gestureText) for (gestureText, id) in gestures.items())
+idToGesture[-1] = "None"
 
 """
 gestures = {
@@ -32,10 +33,11 @@ class FSM:
         self.isDrag = False
         self.inputs = [-1,-1,-1,-1,-1]
         self.i = 0
+        self.prevID = 0
 
     def controlComputer(self, gestureID, x = None, y = None,):
         #print("isDrag = " + str(self.isDrag))
-        print("gestureID = "+str(gestureID)+", gesture = ", end = "")
+        print("gestureID = "+str(gestureID)+", gesture: ")
         """
         #only let gesture ID through if previous 5 ids match
         self.inputs[self.i] = gestureID
@@ -68,9 +70,8 @@ class FSM:
                 print("drag end")
 
             else:
-
-                if(gestureID == 0):     # move mouse (dynamic)
-                    self.m.update(x = x, y = y)
+                if (gestureID == 0):  # move mouse (dynamic)
+                    self.m.update(x=x, y=y)
                     print("move mouse")
                     """
                     # just press/release left click when needed (2) and move mouse to replace drag function
@@ -79,43 +80,47 @@ class FSM:
                             hold == True
                             m.update(pressLeft=True)
                         else:
-                
+
                     """
+                #test if previous id is different to avoid repeated actions
+                elif(self.prevID != gestureID):
+                    print("prev id = "+str(self.prevID)+", id now = "+str(gestureID))
+                    self.prevID = gestureID
 
-                elif(gestureID == 1):   # left click (static)
-                    self.m.update(pressLeft = True)
-                    time.sleep(0.01)
-                    self.m.update(pressLeft = False)
-                    print("left click")
+                    if(gestureID == 1):   # left click (static)
+                        self.m.update(pressLeft = True)
+                        time.sleep(0.01)
+                        self.m.update(pressLeft = False)
+                        print("left click")
 
-                elif (gestureID == 2):  # double left click (static)
-                    self.m.update(pressLeft=True)
-                    time.sleep(0.01)
-                    self.m.update(pressLeft=False)
-                    time.sleep(0.01)
-                    self.m.update(pressLeft=True)
-                    time.sleep(0.01)
-                    self.m.update(pressLeft=False)
-                    print("double click")
+                    elif (gestureID == 2):  # double left click (static)
+                        self.m.update(pressLeft=True)
+                        time.sleep(0.01)
+                        self.m.update(pressLeft=False)
+                        time.sleep(0.01)
+                        self.m.update(pressLeft=True)
+                        time.sleep(0.01)
+                        self.m.update(pressLeft=False)
+                        print("double click")
 
-                elif (gestureID == 3):  # right click (static)
-                    self.m.update(pressRight=True)
-                    time.sleep(0.01)
-                    self.m.update(pressRight=False)
-                    print("right click")
+                    elif (gestureID == 3):  # right click (static)
+                        self.m.update(pressRight=True)
+                        time.sleep(0.01)
+                        self.m.update(pressRight=False)
+                        print("right click")
 
-                elif(gestureID == 5): # show/hide keyboard keyboard
-                    self.kb.updateKey("CTRL", pressDown = True)
-                    self.kb.updateKey("LEFT WINDOWS", pressDown = True)
-                    self.kb.updateKey("O", pressDown = True)
-                    self.kb.updateKey("O", pressDown=False)
-                    self.kb.updateKey("LEFT WINDOWS", pressDown=False)
-                    self.kb.updateKey("CTRL", pressDown=False)
-                    print("show/hide keyboard")
+                    elif(gestureID == 5): # show/hide keyboard keyboard
+                        self.kb.updateKey("CTRL", pressDown = True)
+                        self.kb.updateKey("LEFT WINDOWS", pressDown = True)
+                        self.kb.updateKey("O", pressDown = True)
+                        self.kb.updateKey("O", pressDown=False)
+                        self.kb.updateKey("LEFT WINDOWS", pressDown=False)
+                        self.kb.updateKey("CTRL", pressDown=False)
+                        print("show/hide keyboard")
 
-                else:
-                    self.m.update(pressLeft = False, pressRight = False)
-                    print("Gesture ID "+str(gestureID)+" not recognized")
+                    else:
+                        self.m.update(pressLeft = False, pressRight = False)
+                        print("Gesture ID "+str(gestureID)+" not recognized")
 
 if __name__ == "__main__":
     import Mouse
