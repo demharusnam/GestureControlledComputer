@@ -34,6 +34,7 @@ class FSM:
         self.i = 0
 
     def controlComputer(self, gestureID, x = None, y = None,):
+        print("gestureID = "+str(gestureID)+", gesture = ", end = "")
         """
         #only let gesture ID through if previous 5 ids match
         self.inputs[self.i] = gestureID
@@ -52,20 +53,25 @@ class FSM:
         if(gestureID == 4): # press left click for drag
             if(self.isDrag):
                 self.m.update(x=x, y=y)
+                print("drag")
             else:
                 self.isDrag = True
                 self.m.update(pressLeft = True, x=x, y=y)
+                print("drag start")
+
+            return
 
         else:
             if(self.isDrag): # release left click from drag
                 isDrag = False
                 self.m.update(pressLeft = False)
+                print("drag end")
 
             else:
 
                 if(gestureID == 0):     # move mouse (dynamic)
                     self.m.update(x = x, y = y)
-
+                    print("move mouse")
                     """
                     # just press/release left click when needed (2) and move mouse to replace drag function
                     elif(gestureID == 1):   # drag (left click+ hold, dynamic)
@@ -80,6 +86,7 @@ class FSM:
                     self.m.update(pressLeft = True)
                     time.sleep(0.01)
                     self.m.update(pressLeft = False)
+                    print("left click")
 
                 elif (gestureID == 2):  # double left click (static)
                     self.m.update(pressLeft=True)
@@ -89,11 +96,13 @@ class FSM:
                     self.m.update(pressLeft=True)
                     time.sleep(0.01)
                     self.m.update(pressLeft=False)
+                    print("double click")
 
                 elif (gestureID == 3):  # right click (static)
                     self.m.update(pressRight=True)
                     time.sleep(0.01)
                     self.m.update(pressRight=False)
+                    print("right click")
 
                 elif(gestureID == 5): # show/hide keyboard keyboard
                     self.kb.updateKey("CTRL", pressDown = True)
@@ -102,6 +111,7 @@ class FSM:
                     self.kb.updateKey("O", pressDown=False)
                     self.kb.updateKey("LEFT WINDOWS", pressDown=False)
                     self.kb.updateKey("CTRL", pressDown=False)
+                    print("show/hide keyboard")
 
                 else:
                     self.m.update(pressLeft = False, pressRight = False)
@@ -123,6 +133,6 @@ if __name__ == "__main__":
     time.sleep(1)
     fsm.controlComputer(4,0,0) #start drag at first coordinates
     time.sleep(1)
-    fsm.controlComputer(4, 100, 100) #drag to second coordinatess
+    fsm.controlComputer(0, 100, 100) #end drag at second coordinatess
     time.sleep(1)
     fsm.controlComputer(0, 200, 200) #move mouse to third coordinates away from drag area

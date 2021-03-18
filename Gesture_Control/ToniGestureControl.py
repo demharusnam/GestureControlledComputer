@@ -183,6 +183,7 @@ def beginGestureRecognition():
     # GOAL IS TO KEEP IT UNDER 30FPS FOR PERFORMANCE EFFICIENCY.
 
     while camera.isOpened():
+        time.sleep(0.5)
         # Camera setup
         ret, frame = camera.read()
         frame = cv2.bilateralFilter(frame, 5, 50, 100)  # Smoothing
@@ -275,7 +276,8 @@ def beginGestureRecognition():
             # Calculate visible fingers
             (visibleFingers, thumb, diff, smallAngles, centerX, centerY) = calculateFingers(result, drawing, skinMask.copy())
             #print("visible fingers = " + str(visibleFingers) + " smallAngles = " + str(smallAngles) + " diff = " + str(diff))
-            print("angles = " + str(visibleFingers) + " smallAngles = " + str(smallAngles)+" thumb = "+str(thumb))
+
+            #print("angles = " + str(visibleFingers) + " smallAngles = " + str(smallAngles)+" thumb = "+str(thumb))
 
             # Determine gesture
             gestureText = ""
