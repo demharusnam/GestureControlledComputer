@@ -95,7 +95,7 @@ def calculateFingers(result, drawing, thresh):
                         #defect_far.append(far)
                         #defect_angles.append(theta)
 
-                        if theta >= math.pi/3: # angle less than 60 degrees is small
+                        if theta >= math.pi/2.75: # angle less than 60 degrees is small
 
                             # convexity defect far point that is close-ish to center of mass height is probably connected thumb
                             # cY-sqrt(area) to account for changes in center of mass due to arm?
@@ -107,7 +107,7 @@ def calculateFingers(result, drawing, thresh):
                                 cv2.circle(drawing, far, 8, [255, 0, 0], -1)  # angle
                         else:
                             smallAngles += 1
-                            cv2.circle(drawing, far, 8, [255, 0, 0], -1)  # angle
+                            cv2.circle(drawing, far, 8, [150, 150, 150], -1)  # angle
 
 
                         """
@@ -183,7 +183,7 @@ def beginGestureRecognition():
     # GOAL IS TO KEEP IT UNDER 30FPS FOR PERFORMANCE EFFICIENCY.
 
     while camera.isOpened():
-        time.sleep(0.5)
+        #time.sleep(0.2)
         # Camera setup
         ret, frame = camera.read()
         frame = cv2.bilateralFilter(frame, 5, 50, 100)  # Smoothing
@@ -336,7 +336,7 @@ def beginGestureRecognition():
             break
 
         #programmatic control section
-        fsm.controlComputer(selectedGesture, centerX, y = centerY)
+        fsm.controlComputer(selectedGesture, centerX*3, y = centerY*3)
 
 # Toni use these as gesture codes
 gestures = {
