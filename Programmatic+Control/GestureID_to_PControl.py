@@ -110,8 +110,8 @@ if __name__ == "__main__":
     time.sleep(1)
     fsm.controlComputer(5) #hide keyboard
     time.sleep(1)
-    fsm.controlComputer(4,0,0)
+    fsm.controlComputer(4,0,0) #start drag at first coordinates
     time.sleep(1)
-    fsm.controlComputer(4, 100, 100)
+    fsm.controlComputer(4, 100, 100) #drag to second coordinatess
     time.sleep(1)
-    fsm.controlComputer(0, 200, 200)
+    fsm.controlComputer(0, 200, 200) #move mouse to third coordinates away from drag area
