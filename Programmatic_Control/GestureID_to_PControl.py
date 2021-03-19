@@ -37,12 +37,6 @@ class FSM:
     def controlComputer(self, gestureID, x = None, y = None,):
         #print("gestureID = "+str(gestureID)+", gesture:")
 
-        #prevent negative ID inputs
-        if(gestureID < 0):
-            #self.m.update(pressLeft=False, pressRight=False)
-            print("not recognized")
-            return
-
         """
         #only let gesture ID through if previous 5 ids match
         self.inputs[self.i] = gestureID
@@ -61,8 +55,14 @@ class FSM:
             return
         """
 
+        # prevent negative ID inputs affecting the previous state
+        # default to last known gesture action
+        if(gestureID < 0):
+            print("not recognized")
+            #gestureID = self.prevID
+
         #gestures with no button state change and are continually applied when active
-        if (gestureID == 0):  # move mouse (dynamic)
+        elif (gestureID == 0):  # move mouse (dynamic)
             self.m.update(x=x, y=y)
             print("move mouse")
 

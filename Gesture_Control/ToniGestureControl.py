@@ -32,7 +32,7 @@ def calculateFingers(result, drawing, thresh):
             cY = int(M["m01"] / M["m00"])
             cv2.circle(drawing, (cX,cY), 8, [255, 255, 255], -1)  # center of mass
             # line below which thumb must lie
-            thumbBound = int(cY-math.sqrt(area)/10)
+            thumbBound = int(cY-math.sqrt(area)/20)
             cv2.line(drawing, (cX-16, thumbBound), (cX+16, thumbBound), [255, 150, 150], 2)
 
             #line above which all points of concave triangles must lie
