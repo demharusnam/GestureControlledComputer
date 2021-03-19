@@ -60,60 +60,64 @@ class FSM:
         if(allMatch == False):
             return
         """
-        # print("prev id = "+str(self.prevID)+", id now = "+str(gestureID))
-        if (self.prevID == gestureID): # gestures which are cotinually applied
-            if (gestureID == 0):  # move mouse (dynamic)
-                self.m.update(x=x, y=y)
-                print("move mouse")
-            elif(gestureID == 4): # continue dragging
-                self.m.update(x=x, y=y)
-                print("drag")
 
-        # gestures applied only when ID changes (not continually as above)
-        # test if previous id is different to avoid repeated actions
+        #gestures with no button state change and are continually applied when active
+        if (gestureID == 0):  # move mouse (dynamic)
+            self.m.update(x=x, y=y)
+            print("move mouse")
+
         else:
-            #check if any previous actions need to be finished before starting the next action
-            if (self.prevID == 4):  # release left click from drag
-                self.m.update(pressLeft=False)
-                print("drag end")
+            # print("prev id = "+str(self.prevID)+", id now = "+str(gestureID))
+            # gestures which are continually applied when active after button state change
+            if (self.prevID == gestureID):
+                if(gestureID == 4): # continue dragging
+                    self.m.update(x=x, y=y)
+                    print("drag")
 
-            #check which action should be done now
-            if (gestureID == 1):  # left click (static)
-                self.m.update(pressLeft=True)
-                time.sleep(0.01)
-                self.m.update(pressLeft=False)
-                print("left click")
+            # gestures with button state change applied only once when ID changes (not continually as above)
+            # test if previous id is different to avoid repeated actions
+            else:
+                #check if any previous actions need to be finished before starting the next action
+                if (self.prevID == 4):  # release left click from drag
+                    self.m.update(pressLeft=False)
+                    print("drag end")
 
-            elif (gestureID == 2):  # double left click (static)
-                self.m.update(pressLeft=True)
-                time.sleep(0.01)
-                self.m.update(pressLeft=False)
-                time.sleep(0.01)
-                self.m.update(pressLeft=True)
-                time.sleep(0.01)
-                self.m.update(pressLeft=False)
-                print("double click")
+                #check which action should be done now
+                if (gestureID == 1):  # left click (static)
+                    self.m.update(pressLeft=True)
+                    time.sleep(0.01)
+                    self.m.update(pressLeft=False)
+                    print("left click")
 
-            elif (gestureID == 3):  # right click (static)
-                self.m.update(pressRight=True)
-                time.sleep(0.01)
-                self.m.update(pressRight=False)
-                print("right click")
+                elif (gestureID == 2):  # double left click (static)
+                    self.m.update(pressLeft=True)
+                    time.sleep(0.01)
+                    self.m.update(pressLeft=False)
+                    time.sleep(0.01)
+                    self.m.update(pressLeft=True)
+                    time.sleep(0.01)
+                    self.m.update(pressLeft=False)
+                    print("double click")
 
-            # account for drag having 2 states, the press and release of left click
-            elif(gestureID == 4): # press left click for drag
-                #start drag
+                elif (gestureID == 3):  # right click (static)
+                    self.m.update(pressRight=True)
+                    time.sleep(0.01)
+                    self.m.update(pressRight=False)
+                    print("right click")
+
+                elif(gestureID == 4): # press left click for drag
+                    #start drag
                     self.m.update(pressLeft=True, x=x, y=y)
                     print("drag start")
 
-            elif (gestureID == 5):  # show/hide keyboard keyboard
-                self.kb.updateKey("CTRL", pressDown=True)
-                self.kb.updateKey("LEFT WINDOWS", pressDown=True)
-                self.kb.updateKey("O", pressDown=True)
-                self.kb.updateKey("O", pressDown=False)
-                self.kb.updateKey("LEFT WINDOWS", pressDown=False)
-                self.kb.updateKey("CTRL", pressDown=False)
-                print("show/hide keyboard")
+                elif (gestureID == 5):  # show/hide keyboard keyboard
+                    self.kb.updateKey("CTRL", pressDown=True)
+                    self.kb.updateKey("LEFT WINDOWS", pressDown=True)
+                    self.kb.updateKey("O", pressDown=True)
+                    self.kb.updateKey("O", pressDown=False)
+                    self.kb.updateKey("LEFT WINDOWS", pressDown=False)
+                    self.kb.updateKey("CTRL", pressDown=False)
+                    print("show/hide keyboard")
 
         self.prevID = gestureID
 
