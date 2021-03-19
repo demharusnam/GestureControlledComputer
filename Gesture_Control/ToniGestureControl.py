@@ -204,7 +204,7 @@ def beginGestureRecognition():
     # GOAL IS TO KEEP IT UNDER 30FPS FOR PERFORMANCE EFFICIENCY.
 
     while camera.isOpened():
-        #time.sleep(0.2)
+        time.sleep(0.5)
         # Camera setup
         ret, frame = camera.read()
         frame = cv2.bilateralFilter(frame, 5, 50, 100)  # Smoothing
@@ -298,7 +298,7 @@ def beginGestureRecognition():
             (visibleFingers, thumb, diff, smallAngles, centerX, centerY) = calculateFingers(result, drawing, skinMask.copy())
             #print("visible fingers = " + str(visibleFingers) + " smallAngles = " + str(smallAngles) + " diff = " + str(diff))
 
-            print("angles = " + str(visibleFingers) + " smallAngles = " + str(smallAngles)+" thumb = "+str(thumb))
+            #print("angles = " + str(visibleFingers) + " smallAngles = " + str(smallAngles)+" thumb = "+str(thumb))
             cv2.rectangle(drawing, (offsetX, offsetY), (winWidth-offsetX, winHeight-offsetY), [255, 255, 255], 1)
             # Determine gesture
             gestureText = ""
@@ -354,7 +354,7 @@ def beginGestureRecognition():
             cv2.imshow('Output', drawing)
 
         key = cv2.waitKey(1)
-        print("key = "+str(key))
+        #print("key = "+str(key))
         if key == 27:  # press ESC to exit
             break
 
@@ -363,8 +363,8 @@ def beginGestureRecognition():
 
         elif key == 32: #press SPACEBAR to stop gestures from controlling mouse
             enableControl = False
-        print(centerX, centerY)
-        print("control = "+str(enableControl))
+        #print(centerX, centerY)
+        #print("control = "+str(enableControl))
         if(enableControl):
             #programmatic control section
             fsm.controlComputer(selectedGesture, (centerX-offsetX)*ratioX, y = (centerY-offsetY)*ratioY)
