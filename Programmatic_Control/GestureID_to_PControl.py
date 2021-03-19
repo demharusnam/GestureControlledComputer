@@ -72,6 +72,12 @@ class FSM:
         # gestures applied only when ID changes (not continually as above)
         # test if previous id is different to avoid repeated actions
         else:
+            #check if any previous actions need to be finished before starting the next action
+            if (self.prevID == 4):  # release left click from drag
+                self.m.update(pressLeft=False)
+                print("drag end")
+
+            #check which action should be done now
             if (gestureID == 1):  # left click (static)
                 self.m.update(pressLeft=True)
                 time.sleep(0.01)
@@ -99,9 +105,6 @@ class FSM:
                 #start drag
                     self.m.update(pressLeft=True, x=x, y=y)
                     print("drag start")
-            elif(self.prevID == 4): # release left click from drag
-                self.m.update(pressLeft = False)
-                print("drag end")
 
             elif (gestureID == 5):  # show/hide keyboard keyboard
                 self.kb.updateKey("CTRL", pressDown=True)

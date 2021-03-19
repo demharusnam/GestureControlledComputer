@@ -204,7 +204,7 @@ def beginGestureRecognition():
     # GOAL IS TO KEEP IT UNDER 30FPS FOR PERFORMANCE EFFICIENCY.
 
     while camera.isOpened():
-        time.sleep(0.5)
+        #time.sleep(0.5)
         # Camera setup
         ret, frame = camera.read()
         frame = cv2.bilateralFilter(frame, 5, 50, 100)  # Smoothing
