@@ -1,7 +1,7 @@
 import time
 
 #from Gesture_Control.GestureControl import gestures      # <- Mansur's Gesture Recognition Code
-from Gesture_Control.ToniGestureControl import gestures # <- Toni's Gesture Recognition Code
+from Gesture_Control.GestureControl import gestures # <- Toni's Gesture Recognition Code
 idToGesture = dict((id, gestureText) for (gestureText, id) in gestures.items())
 idToGesture[-1] = "None"
 
