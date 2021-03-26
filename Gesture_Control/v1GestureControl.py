@@ -9,9 +9,10 @@ def calculateFingers(result, drawing, thresh):
     #  convexity defect
     convexHull = cv2.convexHull(result, returnPoints=False)
     visibleFingers = 0
-    diff = 0
+    #diff = 0
     thumb = False
 
+    #ignore convex hulls that are just a triangle, probably not a hand
     if len(convexHull) > 3:
         try:
             defects = cv2.convexityDefects(result, convexHull)
@@ -26,6 +27,8 @@ def calculateFingers(result, drawing, thresh):
                 start = tuple(result[s][0])
                 end = tuple(result[e][0])
                 far = tuple(result[f][0])
+
+                #used to find angles between fingers
                 a = math.sqrt((end[0] - start[0]) ** 2 + (end[1] - start[1]) ** 2)
                 b = math.sqrt((far[0] - start[0]) ** 2 + (far[1] - start[1]) ** 2)
                 c = math.sqrt((end[0] - far[0]) ** 2 + (end[1] - far[1]) ** 2)
@@ -156,8 +159,8 @@ def beginGestureRecognition():
 
             cv2.putText(drawing, gestureText, (int(winWidth * 0.5), winHeight - 15), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
-            #cv2.namedWindow('Output', cv2.WINDOW_NORMAL)
-            #cv2.moveWindow('Output', winWidth * 3 + 15, 0)
+            cv2.namedWindow('Output', cv2.WINDOW_NORMAL)
+            cv2.moveWindow('Output', winWidth * 2 + 15, winHeight) #only changing this line because screen is too small to fit (winWidth * 2 + 15, winHeight)
             drawing = cv2.resize(drawing, (winWidth, winHeight))
             cv2.imshow('Output', drawing)
 

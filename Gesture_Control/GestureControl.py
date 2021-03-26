@@ -4,17 +4,17 @@ import math
 import time
 import imutils
 
-import Mouse
-m = Mouse.Mouse()
+from Programmatic_Control import GestureID_to_PControl
 
 def calculateFingers(result, drawing, thresh):
     """ Calculate fingers visible in frame [TODO: ADD DIRECTION]"""
-    #  convexity defect
     convexHull = cv2.convexHull(result, returnPoints=False)
+    #  convexity defect
     visibleFingers = 0
     diff = 0
     thumb = False
     smallAngles = 0
+    cX = cY = -1
 
     if len(convexHull) > 3:
         try:
@@ -30,7 +30,14 @@ def calculateFingers(result, drawing, thresh):
             M = cv2.moments(result)
             cX = int(M["m10"] / M["m00"])
             cY = int(M["m01"] / M["m00"])
-            cv2.circle(drawing, (cX,cY), 8, [255, 255, 255], -1)  # angle
+            cv2.circle(drawing, (cX,cY), 8, [255, 255, 255], -1)  # center of mass
+            # line below which thumb must lie
+            thumbBound = int(cY-math.sqrt(area)/20)
+            cv2.line(drawing, (cX-16, thumbBound), (cX+16, thumbBound), [255, 150, 150], 2)
+
+            #line above which all points of concave triangles must lie
+            concaveBound = cY+20 #int(cY+10+math.sqrt(area)/10)
+            cv2.line(drawing, (cX-100, concaveBound), (cX+100, concaveBound), [255, 255, 255], 2)
 
             #defect_far = []
             #defect_angles = []
@@ -86,7 +93,7 @@ def calculateFingers(result, drawing, thresh):
 
                 # ignore any concave triangles whose start OR end points are below the center of mass (or somewhere close to it)
                 # screen cordinates go down from the top left corner, which is why all the height logic looks backwards
-                if(start[1] <= cY+20 and end[1] <= cY+20):
+                if(start[1] <= concaveBound and end[1] <= concaveBound):
 
                     # ignore any concave triangles with angles over 120 degrees, or whose triangle depth (aka the dip) is not "big enough" relative to the size of the hand
                     # changes in concave triangle depth are relative to area of hand to account for distance of hand from camera
@@ -94,20 +101,23 @@ def calculateFingers(result, drawing, thresh):
                         #print("distance to convex defect: "+str(concave_dip_sq)+", area = "+str(math.sqrt(area)))
                         #defect_far.append(far)
                         #defect_angles.append(theta)
+                        #rad = math.sqrt(area)
+                        #cv2.circle(drawing, far, int(rad/1.5), [255, 255, 255], 1)  # angle
+                        #cv2.circle(drawing, far, int(rad/4), [255, 255, 255], 1)  # angle
 
-                        if theta >= math.pi/3: # angle less than 60 degrees is small
+                        if theta >= math.pi/2.75: # angle less than 60 degrees is small
 
                             # convexity defect far point that is close-ish to center of mass height is probably connected thumb
                             # cY-sqrt(area) to account for changes in center of mass due to arm?
                             # was testing code with sweater until this point
-                            if (far[1] >= cY-math.sqrt(area)/10):
+                            if (far[1] >= thumbBound):
                                 thumb = True
-                                cv2.circle(drawing, far, 8, [255, 0, 255], -1)  # angle
+                                cv2.rectangle(drawing, (far[0]-8,far[1]-8), (far[0]+8,far[1]+8), [255, 150, 150], -1)  # angle
                             else:
-                                cv2.circle(drawing, far, 8, [255, 0, 0], -1)  # angle
+                                cv2.circle(drawing, far, 8, [255, 100, 100], -1)  # angle
                         else:
                             smallAngles += 1
-                            cv2.circle(drawing, far, 8, [255, 0, 0], -1)  # angle
+                            cv2.circle(drawing, far, 8, [255, 0, 255], -1)  # angle
 
 
                         """
@@ -128,6 +138,7 @@ def calculateFingers(result, drawing, thresh):
                         #cv2.circle(drawing, far, 8, [255, 0, 0], -1) # angle
                         cv2.circle(drawing, end, 8, [255, 255, 0], -1)  # angle
                         cv2.circle(drawing, start, 8, [0, 255, 255], -1)  # angle
+
             """
             # assumes left hand
             for i in range(0, visibleFingers):
@@ -157,12 +168,22 @@ def calculateFingers(result, drawing, thresh):
 #faceContours, _ = cv2.findContours(face, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
 def beginGestureRecognition():
+    fsm = GestureID_to_PControl.FSM()
+    enableControl = False
+
     """ Perform Gesture Recognition """
     # Open Camera
     camera = cv2.VideoCapture(0)
 
     winWidth = 426
     winHeight = 240
+
+    screenWidth = 1480 #1280
+    screenHeight = 920 #720
+    offsetX = 50
+    offsetY = 50
+    ratioX = int((screenWidth)/(winWidth-2*offsetX))
+    ratioY = int((screenHeight)/(winHeight-2*offsetY-10))
 
     # OPENCV's DEFAULT FPS CHECKING METHOD ONLY WORKS ON VIDEO FILES - NOT LIVE FEED
     # Checking FPS
@@ -183,6 +204,7 @@ def beginGestureRecognition():
     # GOAL IS TO KEEP IT UNDER 30FPS FOR PERFORMANCE EFFICIENCY.
 
     while camera.isOpened():
+        #time.sleep(0.5)
         # Camera setup
         ret, frame = camera.read()
         frame = cv2.bilateralFilter(frame, 5, 50, 100)  # Smoothing
@@ -273,10 +295,11 @@ def beginGestureRecognition():
             cv2.drawContours(drawing, [hull], 0, (0, 0, 255), 3)
 
             # Calculate visible fingers
-            (visibleFingers, thumb, diff, smallAngles, mouseX, mouseY) = calculateFingers(result, drawing, skinMask.copy())
+            (visibleFingers, thumb, diff, smallAngles, centerX, centerY) = calculateFingers(result, drawing, skinMask.copy())
             #print("visible fingers = " + str(visibleFingers) + " smallAngles = " + str(smallAngles) + " diff = " + str(diff))
-            print("angles = " + str(visibleFingers) + " smallAngles = " + str(smallAngles)+" thumb = "+str(thumb))
 
+            #print("angles = " + str(visibleFingers) + " smallAngles = " + str(smallAngles)+" thumb = "+str(thumb))
+            cv2.rectangle(drawing, (offsetX, offsetY), (winWidth-offsetX, winHeight-offsetY), [255, 255, 255], 1)
             # Determine gesture
             gestureText = ""
 
@@ -295,10 +318,11 @@ def beginGestureRecognition():
                     gestureText = "Move Mouse"
             """
             angles = visibleFingers
+            selectedGesture = -1
             if len(hull) >= 18:  # a hand
                 if angles == 0:
                     gestureText = "Move Mouse"
-                    m.update(x = mouseX, y = mouseY)
+                    #m.update(x = mouseX, y = mouseY)
                 elif angles == 1:
                     if thumb:
                         gestureText = "Left Click"
@@ -316,12 +340,14 @@ def beginGestureRecognition():
                 elif angles == 3:
                     if thumb:
                         gestureText = "Double Click"
+                    else:
+                        if smallAngles == 3:
+                            gestureText = "Show/Hide KB"
 
                 if gestureText == "":
                     gestureText = "None"
-
-            #if gestureText:
-                #selectedGesture = gestures[gestureText]
+                else:
+                    selectedGesture = gestures[gestureText]
 
             cv2.putText(drawing, gestureText, (int(winWidth * 0.5), winHeight - 15), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
@@ -330,8 +356,21 @@ def beginGestureRecognition():
             drawing = cv2.resize(drawing, (winWidth, winHeight))
             cv2.imshow('Output', drawing)
 
-        if cv2.waitKey(1) == 27:  # press ESC to exit
+        key = cv2.waitKey(1)
+        #print("key = "+str(key))
+        if key == 27:  # press ESC to exit
             break
+
+        elif key == 8: #press BACKSPACE to let gestures control mouse
+            enableControl = True
+
+        elif key == 32: #press SPACEBAR to stop gestures from controlling mouse
+            enableControl = False
+        #print(centerX, centerY)
+        #print("control = "+str(enableControl))
+        if(enableControl):
+            #programmatic control section
+            fsm.controlComputer(selectedGesture, (centerX-offsetX)*ratioX, y = (centerY-offsetY)*ratioY)
 
 # Toni use these as gesture codes
 gestures = {
@@ -340,6 +379,7 @@ gestures = {
     "Double Click" : 2,
     "Right Click" : 3,
     "Drag" : 4,
+    "Show/Hide KB" : 5,
 }
 
 # SELECTED GESTURE CODE
