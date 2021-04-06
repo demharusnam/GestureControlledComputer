@@ -30,7 +30,7 @@ def calculateFingers(result, drawing, thresh):
             M = cv2.moments(result)
             cX = int(M["m10"] / M["m00"])
             cY = int(M["m01"] / M["m00"])
-            cv2.circle(drawing, (cX,cY), 8, [255, 255, 255], -1)  # center of mass
+            cv2.circle(drawing, (cX,cY), 8, [0, 255, 0], -1)  # center of mass
             # line below which thumb must lie
             thumbBound = int(cY-math.sqrt(area)/20)
             cv2.line(drawing, (cX-16, thumbBound), (cX+16, thumbBound), [255, 150, 150], 2)
@@ -159,10 +159,10 @@ def calculateFingers(result, drawing, thresh):
                     #pts = np.array([a,b,c,d], np.int32)
                     #pts = pts.reshape((-1,1,2))
                     #cv2.polylines(drawing, tuple(pts), True, [255,255,255], 3)
-                    cv2.line(drawing, tuple(a),tuple(b), [255, 255, 255], 3)
-                    cv2.line(drawing, tuple(b), tuple(c), [150, 150, 150], 3)
-                    cv2.line(drawing, tuple(c), tuple(d), [255, 255, 255], 3)
-                    cv2.line(drawing, tuple(d), tuple(a), [255, 255, 255], 3)
+                    cv2.line(drawing, tuple(a), tuple(b), [150, 150, 150], 2)
+                    cv2.line(drawing, tuple(b), tuple(c), [255, 255, 255], 2)
+                    cv2.line(drawing, tuple(c), tuple(d), [150, 150, 150], 2)
+                    cv2.line(drawing, tuple(d), tuple(a), [150, 150, 150], 2)
 
                     #diagonals of quadrilateral
                     diagAC = c-a
@@ -175,7 +175,7 @@ def calculateFingers(result, drawing, thresh):
                     else:
                         fingerArea = 0.5*crossProd
 
-                    #rough way of estimating centorid of quadrilateral
+                    #rough way of estimating centroid of quadrilateral
                     fingerCentroid = (a+b+c+d)/4
 
                     #add to centroid and area of all fingers
@@ -191,6 +191,7 @@ def calculateFingers(result, drawing, thresh):
                     dist_sq = w*w + h*h
 
                     #search for the biggest angle or the biggest distance from valid finger angles
+
                     if(True):
                         if(far[1] > lowest_y):
                             lowest_y = far[1]
@@ -202,22 +203,23 @@ def calculateFingers(result, drawing, thresh):
                         biggestAngle = theta
                         index = i
                     """
+
                 print("totalFingersArea = "+str(totalFingersArea))
                 if(totalFingersArea != 0):
                     totalFingersCentroid = totalFingersCentroid/totalFingersArea
                     x = int((area*cX - totalFingersArea*totalFingersCentroid[0])/(area-totalFingersArea))
                     y = int((area*cY - totalFingersArea*totalFingersCentroid[1])/(area-totalFingersArea))
 
-                    print("x = " + str(x) + ", y = " + str(y))
-                    cv2.circle(drawing, (x, y), 4, [150, 150, 150], -1)  # center of mass
+            print("x = " + str(x) + ", y = " + str(y))
+            cv2.circle(drawing, (x, y), 4, [255, 255, 255], -1)  # center of mass w/o fingers
 
-                if(pinkyWristIndex != -1):
-                    far = defectPoints[pinkyWristIndex][2]
+            if(pinkyWristIndex != -1):
+                far = defectPoints[pinkyWristIndex][2]
+                cv2.circle(drawing, far, 8, [255, 255, 255], -1)  # angle
+
+                if (wristIndex2 != -1):
+                    far = defectPoints[wristIndex2][2]
                     cv2.circle(drawing, far, 8, [255, 255, 255], -1)  # angle
-
-                    if (wristIndex2 != -1):
-                        far = defectPoints[wristIndex2][2]
-                        cv2.circle(drawing, far, 8, [255, 255, 255], -1)  # angle
 
     return (visibleFingers, thumb, diff, smallAngles, x, y)
 
