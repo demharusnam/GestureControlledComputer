@@ -41,6 +41,9 @@ def calculateFingers(result, drawing, thresh):
 
             #defect_far = []
             #defect_angles = []
+
+            defectPoints = []
+            angles = []
             for i in range(defects.shape[0]):  # calculate the angle
                 s, e, f, d = defects[i][0]
 
@@ -93,11 +96,18 @@ def calculateFingers(result, drawing, thresh):
 
                 # ignore any concave triangles whose start OR end points are below the center of mass (or somewhere close to it)
                 # screen cordinates go down from the top left corner, which is why all the height logic looks backwards
-                if(start[1] <= concaveBound and end[1] <= concaveBound):
-
+                #if(start[1] <= concaveBound and end[1] <= concaveBound):
+                w = end[0] - start[0]
+                h = end[1] - start[1]
+                dist_sq = w*w + h*h
+                if (dist_sq > area or concave_dip_sq > area / 16):
+                    defectPoints.append((start,end,far))
+                    angles.append(theta)
+                    visibleFingers += 1
                     # ignore any concave triangles with angles over 120 degrees, or whose triangle depth (aka the dip) is not "big enough" relative to the size of the hand
                     # changes in concave triangle depth are relative to area of hand to account for distance of hand from camera
-                    if theta < math.pi / 1.5 and concave_dip_sq > area/16:  # angle less than 90 degrees are fingers
+                    #if theta < math.pi / 1.5 and concave_dip_sq > area / 16:  # angle less than 90 degrees are fingers
+                    if True:  # angle less than 90 degrees are fingers
                         #print("distance to convex defect: "+str(concave_dip_sq)+", area = "+str(math.sqrt(area)))
                         #defect_far.append(far)
                         #defect_angles.append(theta)
@@ -119,47 +129,42 @@ def calculateFingers(result, drawing, thresh):
                             smallAngles += 1
                             cv2.circle(drawing, far, 8, [255, 0, 255], -1)  # angle
 
-
-                        """
-                        if theta > 1.22:  # angle greater than 70 degrees is thumb
-                            # diff = far[1] - top[1]  # height difference between thumb and index
-    
-                            #w = start[0] - end[0]
-                            #h = start[1] - end[1]
-                            #diff = math.sqrt(w * w + h * h)  # distance between thumb joint and index joint
-                            #if (diff > 10):
-                            #    thumb = True
-                        """
-
-                        visibleFingers += 1
-
-                        #cv2.circle(drawing, start, 8, [0, 0, 255], -1) # top right
-                        #cv2.circle(drawing, end, 8, [0, 255, 0], -1) # top left
-                        #cv2.circle(drawing, far, 8, [255, 0, 0], -1) # angle
                         cv2.circle(drawing, end, 8, [255, 255, 0], -1)  # angle
                         cv2.circle(drawing, start, 8, [0, 255, 255], -1)  # angle
 
-            """
-            # assumes left hand
-            for i in range(0, visibleFingers):
+            biggestAngle = 0
+            biggestDist_sq = 0
+            lowest_y = 0
+            wristIndex2 = -1
+            pinkyWristIndex = -1
+            #search for wrist side by pinky
+            for i in range(0,len(angles)):
+                (start, end, far) = defectPoints[i]
+                theta = angles[i]
 
-                if defect_angles[i] > 1.22:  # angle greater than 70 degrees is thumb
-                    #test if distance to 2 nearest knuckles are not similar
-                    if(i > 0):
-                        w = defect_far[i][0] - defect_far[i-1][0]
-                        h = defect_far[i][1] - defect_far[i-1][1]
-                        diff = math.sqrt(w * w + h * h)  # distance between thumb joint and index joint
-                        if (diff > 10):
-                            thumb = True
-                            break
-                    if(i < visibleFingers-1):
-                        w = defect_far[i][0] - defect_far[i + 1][0]
-                        h = defect_far[i][1] - defect_far[i + 1][1]
-                        diff = math.sqrt(w * w + h * h)  # distance between thumb joint and index joint
-                        if (diff > 10):
-                            thumb = True
-                            break
-            """
+                w = end[0] - start[0]
+                h = end[1] - start[1]
+                dist_sq = w*w + h*h
+
+                #search for the biggest angle or the biggest distance from valid finger angles
+                if(True):
+                    if(far[1] > lowest_y):
+                        lowest_y = far[1]
+                        wristIndex2 = pinkyWristIndex
+                        pinkyWristIndex = i
+
+                """
+                if(theta > biggestAngle):
+                    biggestAngle = theta
+                    index = i
+                """
+            if(pinkyWristIndex != -1):
+                far = defectPoints[pinkyWristIndex][2]
+                cv2.circle(drawing, far, 8, [255, 255, 255], -1)  # angle
+
+                if (wristIndex2 != -1):
+                    far = defectPoints[wristIndex2][2]
+                    cv2.circle(drawing, far, 8, [255, 255, 255], -1)  # angle
 
     return (visibleFingers, thumb, diff, smallAngles, cX, cY)
 
