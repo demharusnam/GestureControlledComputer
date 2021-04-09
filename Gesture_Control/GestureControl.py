@@ -135,8 +135,8 @@ def calculateFingers(result, drawing, thresh):
             biggestAngle = 0
             biggestDist_sq = 0
             lowest_y = 0
-            wristIndex2 = -1
-            pinkyWristIndex = -1
+            thumbSideWrist = -1
+            pinkySideWrist = -1
             #search for wrist side by pinky
             totalFingersCentroid = np.array((0,0))
             totalFingersArea = 0
@@ -144,36 +144,86 @@ def calculateFingers(result, drawing, thresh):
             y = cY
 
             if(len(angles) > 1):
+                #search for sides of wrist
                 for i in range(0,len(angles)):
-                    #get quadrilateral of finger between previous angle and this angle
-                    a = np.array(defectPoints[i][0]) #start point of this angle
-                    b = np.array(defectPoints[i][2]) #far point of this angle
-                    if(i == 0):
-                        c = np.array(defectPoints[len(angles)-1][2])  # far point of last angle
-                        d = np.array(defectPoints[len(angles)-1][1])  # end point of last angle
+                    # search for wrist features
+                    (start, end, far) = defectPoints[i]
+                    theta = angles[i]
+
+                    w = end[0] - start[0]
+                    h = end[1] - start[1]
+                    dist_sq = w * w + h * h
+
+                    # search for the biggest angle or the biggest distance from valid finger angles
+
+                    if (True):
+                        if (far[1] > lowest_y):
+                            lowest_y = far[1]
+                            thumbSideWrist = pinkySideWrist
+                            pinkySideWrist = i
+
+                    """
+                    if(theta > biggestAngle):
+                        biggestAngle = theta
+                        index = i
+                    """
+
+                #calculate total finger area and center of mass
+                for i in range(0,len(angles)):
+                    if((i == pinkySideWrist and i-1 != thumbSideWrist) or (i == thumbSideWrist and i-1 != pinkySideWrist)):
+                        #estimate rectangle around length from start point to far point
+                        a = np.array(defectPoints[i][0])  # start point of this angle
+                        b = np.array(defectPoints[i][2])  # far point of this angle
+
+                        w = a[0]-b[0]
+                        h = a[1]-b[1]
+                        length_ab = math.sqrt(w*w + h*h)
+                        length_bc = 50.0
+                        fingerArea = length_ab*length_bc
+
+                        unit_vec_ab = (a-b)/length_ab
+                        #rotate unit vector of ab by 90 degrees
+                        unit_vec_bc = np.array([unit_vec_ab[1], -unit_vec_ab[0]])
+                        c = b + length_bc*unit_vec_bc
+                        #round point c to nearest int coordinates
+                        c = (int(c[0]), int(c[1]))
+                        d = (b-a)+c
+                        print((a,b,c,d))
+                        cv2.line(drawing, tuple(a), tuple(b), [200, 0, 0], 2)
+                        cv2.line(drawing, tuple(b), tuple(c), [255, 255, 255], 2)
+                        cv2.line(drawing, tuple(c), tuple(d), [200, 0, 0], 2)
+                        cv2.line(drawing, tuple(d), tuple(a), [0, 0, 200], 2)
+
                     else:
-                        c = np.array(defectPoints[i-1][2]) #far point of last angle
-                        d = np.array(defectPoints[i-1][1]) #end point of last angle
+                        #get quadrilateral of finger between previous angle and this angle
+                        a = np.array(defectPoints[i][0]) #start point of this angle
+                        b = np.array(defectPoints[i][2]) #far point of this angle
+                        if(i == 0):
+                            c = np.array(defectPoints[len(angles)-1][2])  # far point of last angle
+                            d = np.array(defectPoints[len(angles)-1][1])  # end point of last angle
+                        else:
+                            c = np.array(defectPoints[i-1][2]) #far point of last angle
+                            d = np.array(defectPoints[i-1][1]) #end point of last angle
 
-                    #draw quadrilateral
-                    #pts = np.array([a,b,c,d], np.int32)
-                    #pts = pts.reshape((-1,1,2))
-                    #cv2.polylines(drawing, tuple(pts), True, [255,255,255], 3)
-                    cv2.line(drawing, tuple(a), tuple(b), [150, 150, 150], 2)
-                    cv2.line(drawing, tuple(b), tuple(c), [255, 255, 255], 2)
-                    cv2.line(drawing, tuple(c), tuple(d), [150, 150, 150], 2)
-                    cv2.line(drawing, tuple(d), tuple(a), [150, 150, 150], 2)
+                        #diagonals of quadrilateral
+                        diagAC = c-a
+                        diagDB = b-d
 
-                    #diagonals of quadrilateral
-                    diagAC = c-a
-                    diagDB = b-d
+                        #cross product of diagonal ac with diagonal db
+                        crossProd = diagAC[0]*diagDB[1] - diagAC[1]*diagDB[0]
+                        if crossProd < 0:
+                            fingerArea = -0.5*crossProd
+                        else:
+                            fingerArea = 0.5*crossProd
 
-                    #cross product of diagonal ac with diagonal db
-                    crossProd = diagAC[0]*diagDB[1] - diagAC[1]*diagDB[0]
-                    if crossProd < 0:
-                        fingerArea = -0.5*crossProd
-                    else:
-                        fingerArea = 0.5*crossProd
+                        # draw quadrilateral
+                        # pts = np.array([a,b,c,d], np.int32)
+                        # pts = pts.reshape((-1,1,2))
+                        # cv2.polylines(drawing, tuple(pts), True, [255,255,255], 3)
+                        cv2.line(drawing, tuple(a), tuple(b), [200, 200, 200], 2)
+                        cv2.line(drawing, tuple(b), tuple(c), [255, 255, 255], 2)
+                        cv2.line(drawing, tuple(c), tuple(d), [200, 200, 200], 2)
+                        cv2.line(drawing, tuple(d), tuple(a), [200, 200, 200], 2)
 
                     #rough way of estimating centroid of quadrilateral
                     fingerCentroid = (a+b+c+d)/4
@@ -182,44 +232,23 @@ def calculateFingers(result, drawing, thresh):
                     totalFingersCentroid = totalFingersCentroid + fingerArea*fingerCentroid
                     totalFingersArea = totalFingersArea + fingerArea
 
-                    #search for wrist features
-                    (start, end, far) = defectPoints[i]
-                    theta = angles[i]
-
-                    w = end[0] - start[0]
-                    h = end[1] - start[1]
-                    dist_sq = w*w + h*h
-
-                    #search for the biggest angle or the biggest distance from valid finger angles
-
-                    if(True):
-                        if(far[1] > lowest_y):
-                            lowest_y = far[1]
-                            wristIndex2 = pinkyWristIndex
-                            pinkyWristIndex = i
-
-                    """
-                    if(theta > biggestAngle):
-                        biggestAngle = theta
-                        index = i
-                    """
-
-                print("totalFingersArea = "+str(totalFingersArea))
-                if(totalFingersArea != 0):
-                    totalFingersCentroid = totalFingersCentroid/totalFingersArea
-                    x = int((area*cX - totalFingersArea*totalFingersCentroid[0])/(area-totalFingersArea))
-                    y = int((area*cY - totalFingersArea*totalFingersCentroid[1])/(area-totalFingersArea))
+            #draw improved center of mass and wrist features
+            print("totalFingersArea = "+str(totalFingersArea))
+            if(totalFingersArea != 0):
+                totalFingersCentroid = totalFingersCentroid/totalFingersArea
+                x = int((area*cX - totalFingersArea*totalFingersCentroid[0])/(area-totalFingersArea))
+                y = int((area*cY - totalFingersArea*totalFingersCentroid[1])/(area-totalFingersArea))
 
             print("x = " + str(x) + ", y = " + str(y))
             cv2.circle(drawing, (x, y), 4, [255, 255, 255], -1)  # center of mass w/o fingers
 
-            if(pinkyWristIndex != -1):
-                far = defectPoints[pinkyWristIndex][2]
+            if(pinkySideWrist != -1):
+                far = defectPoints[pinkySideWrist][2]
                 cv2.circle(drawing, far, 8, [255, 255, 255], -1)  # angle
 
-                if (wristIndex2 != -1):
-                    far = defectPoints[wristIndex2][2]
-                    cv2.circle(drawing, far, 8, [255, 255, 255], -1)  # angle
+            if (thumbSideWrist != -1):
+                far = defectPoints[thumbSideWrist][2]
+                cv2.circle(drawing, far, 8, [255, 255, 255], -1)  # angle
 
     return (visibleFingers, thumb, diff, smallAngles, x, y)
 
