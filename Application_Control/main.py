@@ -153,7 +153,6 @@ class Worker(QObject):
         self.continue_run = True
 
     def do_work(self):
-
         fsm = GestureID_to_PControl.FSM()
         enableControl = False
 
@@ -279,6 +278,9 @@ class Worker(QObject):
                     elif angles == 3:
                         if thumb:
                             gestureText = "Double Click"
+                        else:
+                            if smallAngles == 3:
+                                gestureText = "Show/Hide KB"
 
                     if gestureText == "":
                         gestureText = "None"
@@ -346,6 +348,14 @@ class MainWindow(QtWidgets.QMainWindow):
             #ui.endBtn.clicked.connect(self.endFunction)
             ui.gesturesBtn.clicked.connect(self.gesturesFunction)
 
+
+            ui.startBtn.clicked.connect(self.start_thread)
+            ui.endBtn.clicked.connect(self.stop_thread)
+
+
+            self.show()
+
+        def start_thread(self):
             # Thread:
             self.thread = QThread()
             self.worker = Worker()
@@ -355,19 +365,14 @@ class MainWindow(QtWidgets.QMainWindow):
             self.worker.finished.connect(self.thread.quit)
             self.worker.finished.connect(self.worker.deleteLater)
             self.thread.finished.connect(self.thread.deleteLater)
+            self.thread.start()
 
             self.thread.started.connect(self.worker.do_work)
             self.thread.finished.connect(self.worker.stop)
 
-            ui.startBtn.clicked.connect(self.thread.start)
-            ui.endBtn.clicked.connect(self.stop_thread)
-
-
-            self.show()
-
-        # When stop_btn is clicked this runs. Terminates the worker and the thread.
+        # Terminates worker and thread
         def stop_thread(self):
-            self.stop_signal.emit()  # emit the finished signal on stop
+            self.stop_signal.emit()  # emit finished signal
 
 
         def startFunction(self):
@@ -420,6 +425,7 @@ gestures = {
     "Double Click": 2,
     "Right Click": 3,
     "Drag": 4,
+    "Show/Hide KB": 5,
 }
 
 # SELECTED GESTURE CODE
