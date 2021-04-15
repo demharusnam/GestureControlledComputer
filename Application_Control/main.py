@@ -356,12 +356,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.show()
 
         def start_thread(self):
-            # Thread:
+            
             self.thread = QThread()
             self.worker = Worker()
             self.stop_signal.connect(self.worker.stop)
             self.worker.moveToThread(self.thread)
-
             self.worker.finished.connect(self.thread.quit)
             self.worker.finished.connect(self.worker.deleteLater)
             self.thread.finished.connect(self.thread.deleteLater)
@@ -370,9 +369,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.thread.started.connect(self.worker.do_work)
             self.thread.finished.connect(self.worker.stop)
 
-        # Terminates worker and thread
+
         def stop_thread(self):
-            self.stop_signal.emit()  # emit finished signal
+            self.stop_signal.emit()  
 
 
         def startFunction(self):
